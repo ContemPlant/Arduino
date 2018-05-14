@@ -1,6 +1,10 @@
 #include "DHT.h"
 
 #include <SoftwareSerial.h>
+#define rxPin 3
+#define txPin 4
+
+SoftwareSerial xbee(rxPin, txPin);
 
 //define sensor pins
 #define MOISTURE_SENSOR A0
@@ -27,7 +31,7 @@ uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default valu
 typedef struct _data {
   uint8_t flags;
   uint8_t pid;
-  unsigned int timestamp;
+  unsigned long timestamp;
   uint8_t health;
   uint8_t psize;
   float temp;
@@ -35,15 +39,14 @@ typedef struct _data {
   float rad; 
 }data;
 
-SoftwareSerial gtSerial(8, 7);
-
 void setup() {
   // put your setup code here, to run once:
   pinMode(MOISTURE_SENSOR, INPUT);
   pinMode(HUMIDITY_TEMPERATURE, INPUT);
   
   Serial.begin(9600);
-  gtSerial.begin(9600);
+  xbee.begin(9600);
+  
   dht.begin();
   //start i2c communication
   Wire.begin();
@@ -61,11 +64,10 @@ void setup() {
 
   //Set the start coordinate.
   LCD.CharGotoXY(0,0);
-  /*
+  
   LCD.println("Temp: ");
   LCD.println("Humidity: ");
-  LCD.println("Moisture: ");
-  LCD.println("Radiation: ");*/
+  LCD.println("Radiation: ");
 }
 
 float temperature() {
@@ -86,45 +88,43 @@ int timestamp () {
 }
 
 int health () {
-  
+  return 0;
 }
 
 char* marshall () {
   
 }
 
+void sendStruct(data* d) {
+  xbee.write((uint8_t*) d, sizeof(data));
+  xbee.print("\n");
+}
+
 
 void loop() {
-  data* it = malloc(sizeof(data));
-  // put your main code here, to run repeatedly:
-  // send data only when you receive data:
-  it->pid = 1;
-  it->health = 100;
-  it->psize = 5;
-  it->timestamp = millis();
-  it->temp = temperature();
-  it->hum = humidity();
-  it->rad = radiation();
-
-  int p = 15;
-
-  char* buf = malloc(sizeof(data) + 1);
-  memcpy(buf, it, sizeof(data));
-  buf[sizeof(data)] = '\0';
-
-  //Serial.write(buf, strlen(buf));
-  gtSerial.write("HEY");
-
-  /*Serial.write(it, sizeof(data));*/
-  /*LCD.CharGotoXY(80,0);
+ 
+  if(true || xbee.available() && xbee.read() > 0) {
+    data* it = calloc(sizeof(data), 1);
+    it->flags = (int) 0b11111111;
+    it->pid = 1;
+    it->timestamp = 1526299756;
+    it->health = health();
+    it->psize = 1;
+    it->temp = temperature();
+    it->hum = humidity();
+    it->rad = radiation();
+    
+    sendStruct(it);
+    
+    free(it);
+    delay(3000);
+  }
+      
+  LCD.CharGotoXY(80,0);
   LCD.print(temperature());
   LCD.CharGotoXY(80,16);
   LCD.print(humidity());
   LCD.CharGotoXY(80,32);
-  LCD.print(moisture());
-  LCD.CharGotoXY(80,48);
-  LCD.print(radiation());*/
-
-  
+  LCD.print(radiation());
 
 }

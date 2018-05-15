@@ -1,4 +1,5 @@
-[16:05, 12.5.2018] Timon Palme: #include "DHT.h"
+//[16:05, 12.5.2018] Timon Palme: 
+/*#include "DHT.h"
 
 //define sensor pins
 #define MOISTURE_SENSOR A0
@@ -7,7 +8,7 @@
 
 //setup temperature and humidity sensor
 #define DHTTYPE DHT22
-DHT dht(HUMIDITY_TEMPERATURE, DHTTYPE);
+//DHT dht(HUMIDITY_TEMPERATURE, DHTTYPE);
 
 
 //setup radiation sensor
@@ -108,7 +109,8 @@ void loop() {
   Serial.print(health(temp_deg, humidity_proz, sunlight_lumen, moisture_proz));
 
 }
-[16:31, 12.5.2018] Timon Palme: #include "DHT.h"
+*/
+#include "DHT.h"
 
 //define sensor pins
 #define MOISTURE_SENSOR A0
@@ -132,15 +134,15 @@ SI114X radsens = SI114X();
 I2C_LCD LCD;
 uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
 
-float temp_deg = 20.0;
-float humidity_proz = 0.3;
-float sunlight_lumen = 400;
+float temp_deg = 27.0;
+float humidity_proz = 30.0;
+float sunlight_lumen = 250.0;
 float moisture_proz = 0.1;
 
-float temp_weight = ;
-float humidity_weight = ;
-float sunlight_weight = ;
-float moisture_weight = ;
+float temp_weight = 1.0;
+float humidity_weight = 1.0;
+float sunlight_weight = 1.0;
+float moisture_weight = 1.0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -184,7 +186,7 @@ float moisture() {
 }
 
 float radiation() {
-  return (radsens.ReadVisible() + radsens.ReadIR() + (radsens.ReadUV()/100.0))/3.0;
+  return radsens.ReadVisible();
 }
 
 int timestamp () {
@@ -197,11 +199,13 @@ float health (float temp, float hum, float light, float moist) {
   float diff_light = abs(light - radsens.ReadVisible());
   float diff_moist = abs(moist - analogRead(MOISTURE_SENSOR)/1023.0);
 
-  return (temp_weight * healthFnct(30, diff_temp) + humidity_weight * healthFnct(0.3, diff_hum) + 
-          sunlight_weight * healthFnct(200, diff_light) + moisture_weight * healthFnct(0.2, diff_moist))/4;
+  return (temp_weight * healthFnct(10.0, diff_temp) + humidity_weight * healthFnct(20.0, diff_hum) + 
+          sunlight_weight * healthFnct(100.0, diff_light) + moisture_weight * healthFnct(0.2, diff_moist))/4;
 }
 
 float healthFnct (float maxi, float deviation) {
+  if (maxi < deviation) return 0;
+  
   return ((2/(pow(maxi,3))) * (pow(deviation,3))) - ((3/(pow(maxi,2)))*(pow(deviation,2))) + 1;
 }
 
@@ -221,6 +225,6 @@ void loop() {
   LCD.print(moisture());
   LCD.CharGotoXY(80,48);
   LCD.print(radiation());
-  Serial.print(health(temp_deg, humidity_proz, sunlight_lumen, moisture_proz));
+  Serial.println(health(temp_deg, humidity_proz, sunlight_lumen, moisture_proz));
 
 }

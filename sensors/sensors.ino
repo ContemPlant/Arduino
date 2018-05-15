@@ -1,10 +1,17 @@
+#define AID 0 // Unique arduino id
+
+// Temperatur und Luftfeutchtigkeit Lib
 #include "DHT.h"
 
+// Xbee API Lib
+#include <XBee.h>
+#define PI_ADR 0x0
+
+// Software serial com with xbee
 #include <SoftwareSerial.h>
 #define rxPin 3
 #define txPin 4
-
-SoftwareSerial xbee(rxPin, txPin);
+SoftwareSerial softwareSerial(rxPin, txPin);
 
 //define sensor pins
 #define MOISTURE_SENSOR A0
@@ -31,6 +38,7 @@ uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default valu
 typedef struct _data {
   uint8_t flags;
   uint8_t pid;
+  uint8_t aid;
   unsigned long timestamp;
   uint8_t health;
   uint8_t psize;
@@ -39,13 +47,18 @@ typedef struct _data {
   float rad; 
 }data;
 
+// Create an XBee object at the top of your sketch
+XBee xbee = XBee();
+
 void setup() {
   // put your setup code here, to run once:
   pinMode(MOISTURE_SENSOR, INPUT);
   pinMode(HUMIDITY_TEMPERATURE, INPUT);
   
   Serial.begin(9600);
-  xbee.begin(9600);
+  softwareSerial.begin(9600);
+  // Tell XBee to use Hardware Serial. It's also possible to use SoftwareSerial
+  xbee.setSerial(softwareSerial);
   
   dht.begin();
   //start i2c communication
@@ -95,36 +108,54 @@ char* marshall () {
   
 }
 
-void sendStruct(data* d) {
-  xbee.write((uint8_t*) d, sizeof(data));
-  xbee.print("\n");
+bool sendStructTo(uint16_t addr16, data* payload) {
+//  softwareSerial.write((uint8_t*) d, sizeof(data));
+//  softwareSerial.print("\n");
+  
+  // Create a TX Request
+  Tx16Request zbTx = Tx16Request(addr16, (uint8_t*) payload, sizeof(data));
+  // Send your request
+  xbee.send(zbTx);
+
+//  if (xbee.getResponse().isAvailable()) {
+//    Rx16Response rx16 = Rx16Response();
+//    if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
+//      xbee.getResponse().getRx16Response(rx16);
+//      Serial.print(rx16.getRemoteAddress16());
+//      //Serial.print(rx16);
+//      return true;
+//    }
+//  }
+  return false;
+  
+}
+
+void structToLCD(data* d) {
+  LCD.CharGotoXY(80,0);
+  LCD.print(d->temp);
+  LCD.CharGotoXY(80,16);
+  LCD.print(d->hum);
+  LCD.CharGotoXY(80,32);
+  LCD.print(d->rad);
 }
 
 
 void loop() {
- 
-  if(true || xbee.available() && xbee.read() > 0) {
-    data* it = calloc(sizeof(data), 1);
-    it->flags = (int) 0b11111111;
-    it->pid = 1;
-    it->timestamp = 1526299756;
-    it->health = health();
-    it->psize = 1;
-    it->temp = temperature();
-    it->hum = humidity();
-    it->rad = radiation();
-    
-    sendStruct(it);
-    
-    free(it);
-    delay(3000);
-  }
-      
-  LCD.CharGotoXY(80,0);
-  LCD.print(temperature());
-  LCD.CharGotoXY(80,16);
-  LCD.print(humidity());
-  LCD.CharGotoXY(80,32);
-  LCD.print(radiation());
+  data* it = calloc(sizeof(data), 1);
+  it->flags = (int) 0b11111111;
+  it->pid = 1;
+  it->aid = AID;
+  it->timestamp = 1526299756;
+  it->health = health();
+  it->psize = 1;
+  it->temp = temperature();
+  it->hum = humidity();
+  it->rad = radiation();
+  
+  sendStructTo(PI_ADR, it);
+  structToLCD(it);
+  
+  free(it);
+  delay(3000);
 
 }

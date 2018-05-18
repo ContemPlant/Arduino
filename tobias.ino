@@ -78,10 +78,16 @@ int timestamp () {
 }
 
 float health (float temp, float hum, float light, float moist) {
-  float diff_temp = abs(temp - dht.readTemperature());
-  float diff_hum = abs(hum - dht.readHumidity());
-  float diff_light = abs(light - radsens.ReadVisible());
-  float diff_moist = abs(moist - analogRead(MOISTURE_SENSOR)/1023.0);
+  float diff_temp = temp - dht.readTemperature();
+  float diff_hum = hum - dht.readHumidity();
+  float diff_light = light - radsens.ReadVisible();
+  float diff_moist = moist - analogRead(MOISTURE_SENSOR)/1023.0;
+  
+  diff_temp *= diff_temp;
+  diff_hum *= diff_hum;
+  diff_light *= diff_light;
+  diff_moist *= diff_moist;
+  
 
   return (healthFnct(30, diff_temp) + healthFnct(0.3, diff_hum) + healthFnct(200, diff_light) + healthFnct(0.2, diff_moist))/4;
 }

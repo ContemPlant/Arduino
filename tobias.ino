@@ -22,7 +22,6 @@ SoftwareSerial softwareSerial(rxPin, txPin);
 #define DHTTYPE DHT22
 DHT dht(HUMIDITY_TEMPERATURE, DHTTYPE);
 
-
 //setup radiation sensor
 #include <Wire.h>
 #include "Arduino.h"
@@ -34,6 +33,16 @@ SI114X radsens = SI114X();
 #include <I2C_LCD.h>
 I2C_LCD LCD;
 uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
+
+float temp_deg = 27.0;
+float humidity_proz = 30.0;
+float sunlight_lumen = 250.0;
+float moisture_proz = 0.1;
+
+float temp_weight = 1.0;
+float humidity_weight = 1.0;
+float sunlight_weight = 1.0;
+float moisture_weight = 1.0;
 
 typedef struct _data {
   uint8_t flags;
@@ -58,7 +67,7 @@ void setup() {
   Serial.begin(9600);
   softwareSerial.begin(9600);
   // Tell XBee to use Hardware Serial. It's also possible to use SoftwareSerial
-  xbee.setSerial(softwareSerial);
+  xbee.setSerial(softwareSerial
   
   dht.begin();
   //start i2c communication
@@ -77,10 +86,10 @@ void setup() {
 
   //Set the start coordinate.
   LCD.CharGotoXY(0,0);
-  
   LCD.println("Temp: ");
   LCD.println("Humidity: ");
-  LCD.println("Radiation: ");
+  LCD.println("Moisture: ");
+  LCD.println("Health: ");
 }
 
 float temperature() {
@@ -91,24 +100,35 @@ float humidity() {
   return dht.readHumidity();
 }
 
+float moisture() {
+  return analogRead(MOISTURE_SENSOR)/1023.0;
+}
 
 float radiation() {
-  return (radsens.ReadVisible() + radsens.ReadIR() + (radsens.ReadUV()/100.0))/3.0;
+  return radsens.ReadVisible();
 }
 
 int timestamp () {
   
 }
 
-int health () {
-  return 0;
+float health (float temp, float hum, float light, float moist) {
+  float diff_temp = abs(temp - dht.readTemperature());
+  float diff_hum = abs(hum - dht.readHumidity());
+  float diff_light = abs(light - radsens.ReadVisible());
+  float diff_moist = abs(moist - analogRead(MOISTURE_SENSOR)/1023.0);
+
+  return (temp_weight * healthFnct(10.0, diff_temp) + humidity_weight * healthFnct(20.0, diff_hum) + 
+          sunlight_weight * healthFnct(100.0, diff_light) + moisture_weight * healthFnct(0.2, diff_moist))/4;
 }
 
-char* marshall () {
+float healthFnct (float maxi, float deviation) {
+  if (maxi < deviation) return 0;
   
+  return ((2/(pow(maxi,3))) * (pow(deviation,3))) - ((3/(pow(maxi,2)))*(pow(deviation,2))) + 1;
 }
 
-bool sendStructTo(uint16_t addr16, data* payload) {
+void sendStructTo(uint16_t addr16, data* payload) {
 //  softwareSerial.write((uint8_t*) d, sizeof(data));
 //  softwareSerial.print("\n");
   
@@ -126,7 +146,7 @@ bool sendStructTo(uint16_t addr16, data* payload) {
 //      return true;
 //    }
 //  }
-  return false;
+//  return false;
   
 }
 
@@ -137,25 +157,26 @@ void structToLCD(data* d) {
   LCD.print(d->hum);
   LCD.CharGotoXY(80,32);
   LCD.print(d->rad);
+  LCD.CharGotoXY(80,48);
+  LCD.print(d->health)
 }
 
-
 void loop() {
-  data* it = calloc(sizeof(data), 1);
-  it->flags = (int) 0b11111111;
-  it->pid = 1;
-  it->aid = AID;
-  it->timestamp = 1526299756;
-  it->health = health();
-  it->psize = 1;
-  it->temp = temperature();
-  it->hum = humidity();
-  it->rad = radiation();
+    data* it = calloc(sizeof(data), 1);
+    it->flags = (int) 0b11111111;
+    it->pid = 1;
+    it->aid = AID;
+    it->timestamp = 1526299756;
+    it->health = health(temp_deg, humidity_proz, sunlight_lumen, moisture_proz);
+    it->psize = 1;
+    it->temp = temperature();
+    it->hum = humidity();
+    it->rad = radiation();
   
-  sendStructTo(PI_ADR, it);
-  structToLCD(it);
+    sendStructTo(PI_ADR, it);
+    structToLCD(it);
   
-  free(it);
-  delay(3000);
+    free(it);
+    delay(3000);
 
 }

@@ -32,6 +32,19 @@
   float temp_weight = 0.4;
   float humidity_weight = 0.2;
   float sunlight_weight = 0.4;
+  
+// struct for storing data
+typedef struct data_ data;
+struct data_{
+  uint32_t time;      //minutes since 1900-01-01
+  uint8_t comp;       //amount of packets merged into one
+  int8_t temp;        //temperature in deegrees celsius *10
+  uint8_t hum;        //humidity in percent
+  uint16_t rad;       //visible light in lumen
+  uint8_t loud;       //loudness in decibel
+  uint8_t health;     //plant health in percent
+  uint8_t weight;     //plant weight in kilogram
+};
 
 void setup();
 void loop();

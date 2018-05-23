@@ -12,6 +12,12 @@ void setup() {
       delay(500);
     }
 
+  //initialize global variables
+  currentWriteAddress = 0;
+  currentCompressionLevel = 0;
+  maxCompressionLevel = 1;
+
+
   //----LCD----
     LCD.CleanAll(WHITE);    //Clean the screen with black or white.
     LCD2.CleanAll(WHITE);

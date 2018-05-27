@@ -10,3 +10,8 @@ float humidity() {
 float radiation() {
   return radsens.ReadVisible();
 }
+
+float loudness(){
+  return analogRead(LOUDNESS);
+}
+

@@ -1,17 +1,3 @@
-// !!function signatures, just for easier lookup!!
-
-// --write size bytes from buffer to index
-// void write_data(int index, char* buffer, int size)
-
-// --merges two packets a,b by building the average c. >a< was recorded prior to >b<
-// void merge_packets(data* a, data* b, data* c)
-
-// --compresses memory if full and updates currentWriteAddress
-// int compress_memory()
-
-// --stores new data packet at the right position
-// void store_packet(data* packet);
-
 // write size bytes from buffer to index
 void write_data(int index, char* buffer, int size){
 	for (int i = 0; i < size; ++i)
@@ -20,7 +6,7 @@ void write_data(int index, char* buffer, int size){
 	}
 }
 
-// merges two packets a,b by building the average c. >a< was recorded prior to >b<
+// merges two packets a,b by building the average c. a should be recorded prior to b
 void merge_packets(data* a, data* b, data* c){
 	c->time = a->time;
 	c->comp = a->comp + b->comp;
@@ -28,8 +14,6 @@ void merge_packets(data* a, data* b, data* c){
 	c->hum = (a->comp * a->hum + b->comp * b->hum) / (a->comp + b->comp);
 	c->rad = (a->comp * a->rad + b->comp * b->rad) / (a->comp + b->comp);
 	c->loud = (a->comp * a->loud + b->comp * b->loud) / (a->comp + b->comp);
-	c->health = (a->comp * a->health + b->comp * b->health) / (a->comp + b->comp);
-	c->weight = (a->comp * a->weight + b->comp * b->weight) / (a->comp + b->comp);
 }
 
 // compresses memory if full and updates currentWriteAddress
@@ -73,4 +57,15 @@ void store_packet(data* packet){
 	}
 
 	compress_memory();
+}
+
+// write from temporary to permanent memory (EEPROM) and reset currentWriteAddressTempMem
+void write_temp_to_perm(){
+	for (int i = 0; i < TEMP_MEMORY_SIZE; ++i)
+	{
+		store_packet(temp_mem[i]);
+		free(temp_mem[i]);
+	}
+
+	currentWriteAddressTempMem = 0;
 }

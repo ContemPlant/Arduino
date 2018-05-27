@@ -4,8 +4,8 @@ float env_factor (float temp, float hum, float light) {
   float diff_hum = abs(hum - dht.readHumidity());
   float diff_light = abs(light - radsens.ReadVisible());
 
-  return (temp_weight * fnct(10.0, diff_temp) + humidity_weight * fnct(20.0, diff_hum) + 
-          sunlight_weight * fnct(100.0, diff_light));
+  return (temp_weight * fnct(10.0, diff_temp) + hum_weight * fnct(20.0, diff_hum) + 
+          rad_weight * fnct(100.0, diff_light));
 }
 
 float fnct (float maxi, float deviation) {

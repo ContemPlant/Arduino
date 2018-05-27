@@ -1,4 +1,5 @@
-#include "DHT.h"
+//----EEPROM----
+  #include <EEPROM.h>
 
 //define sensor pins
   #define HUMIDITY_TEMPERATURE 2
@@ -6,6 +7,7 @@
   #define LOUDNESS A3
 
 //----humidity and temerature sensor----
+  #include "DHT.h"
   #define DHTTYPE DHT22
   DHT dht(HUMIDITY_TEMPERATURE, DHTTYPE);
 
@@ -23,38 +25,56 @@
   uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
 
 //----best values----
-  int loudness_db = 0;
-  float temp_deg = 23.0;
-  float humidity_proz = 50.0;
-  float sunlight_lumen = 260.0;
+  float temp_opt = 23.0;  //degrees
+  float hum_opt = 50.0; //percent
+  float rad_opt = 260.0; //lumen
+  float loud_opt = 0;  //decibel
 
 //----weights----
   float temp_weight = 0.4;
-  float humidity_weight = 0.2;
-  float sunlight_weight = 0.4;
+  float hum_weight = 0.2;
+  float rad_weight = 0.4;
+  float loud_weight = 1;
 
 //----define----
   #define MEMORY_SIZE 1024
-
-//----global variables----
-  int currentWriteAddress;
-  int currentCompressionLevel;
-  int maxCompressionLevel;
+  #define TEMP_MEMORY_SIZE 10 //measured in packets
   
-// struct for storing data
-typedef struct data_ data;
-struct data_{
+//----structs----
+typedef struct data_{
   uint32_t time;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
   int16_t temp;        //temperature in deegrees celsius *10
   uint8_t hum;        //humidity in percent
   uint16_t rad;       //visible light in lumen
   uint8_t loud;       //loudness in decibel
-  uint8_t health;     //plant health in percent
-  uint8_t weight;     //plant weight in kilogram
-};
+}data;
 
-void setup();
-void loop();
+typedef struct plant_info_{
+  uint8_t flags;
+  float temp_opt;
+  float temp_weight;
+  float hum_opt;
+  float hum_weight;
+  float rad_opt;
+  float rad_weight;
+  float loud_opt;
+  float loud_weight;
+}plant_info;
+
+//----global variables----
+  int currentWriteAddress;
+  int currentWriteAddressTempMem;
+  int currentCompressionLevel;
+  int maxCompressionLevel;
+  data** temp_mem;  //"temporary memory" for saving data packets
+
+  
+void setup(){
+  setup2();
+}
+void loop(){
+  loop2();
+}
 
 

@@ -1,3 +1,6 @@
+uint32_t get_time(){
+	return 0;
+}
 
 void print_on_lcd() {
   
@@ -9,6 +12,6 @@ void print_on_lcd() {
   LCD.print((int) radiation());
   LCD.CharGotoXY(80,48);
   //LCD.print(analogRead(LOUDNESS));
-  LCD.print(env_factor(temp_deg, humidity_proz, sunlight_lumen) * 100);
+  LCD.print(env_factor(temp_opt, hum_opt, rad_opt) * 100);
 
 }

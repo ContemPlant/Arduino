@@ -16,8 +16,16 @@ void loop2() {
 	currentWriteAddressTempMem++;
 
 	// send data
-	send_data();
-	
+	if (sending() == 0)
+	{
+		// erase memory
+		clear_temp_mem();
+		clear_perm_mem();
+	}
+
+	// receive data
+	receiving();	
+
   // print environment parameters
   print_on_lcd();
 

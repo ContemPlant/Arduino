@@ -21,24 +21,12 @@
 //----lcd display----
   #include <I2C_LCD.h>
   I2C_LCD LCD;
-  I2C_LCD LCD2;
   uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
-
-//----best values----
-  float temp_opt = 23.0;  //degrees
-  float hum_opt = 50.0; //percent
-  float rad_opt = 260.0; //lumen
-  float loud_opt = 0;  //decibel
-
-//----weights----
-  float temp_weight = 0.4;
-  float hum_weight = 0.2;
-  float rad_weight = 0.4;
-  float loud_weight = 1;
 
 //----define----
   #define MEMORY_SIZE 1024
-  #define TEMP_MEMORY_SIZE 10 //measured in packets
+  #define TEMP_MEMORY_SIZE 16 //measured in packets
+  #define DEFAULT_PLANT_ID 0
   
 //----structs----
 typedef struct data_{
@@ -51,7 +39,7 @@ typedef struct data_{
 }data;
 
 typedef struct plant_info_{
-  uint8_t flags;
+  uint32_t id;
   float temp_opt;
   float temp_weight;
   float hum_opt;
@@ -63,12 +51,14 @@ typedef struct plant_info_{
 }plant_info;
 
 //----global variables----
+  int startWriteAddress;
   int currentWriteAddress;
   int currentWriteAddressTempMem;
   int currentCompressionLevel;
   int maxCompressionLevel;
   data** temp_mem;  //"temporary memory" for saving data packets
-
+  plant_info* plant;  //store info about current plant
+  int loopno = 0;
   
 void setup(){
   setup2();

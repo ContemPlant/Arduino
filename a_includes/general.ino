@@ -1,17 +1,30 @@
 uint32_t get_time(){
-	return 0;
+	return loopno;
 }
 
 void print_on_lcd() {
-  
-  LCD.CharGotoXY(80,0);
+  LCD.CharGotoXY(60,0);
+  LCD.print(plant->id);
+  LCD.CharGotoXY(60,8);
   LCD.print(temperature());
-  LCD.CharGotoXY(80,16);
+  LCD.CharGotoXY(60,16);
   LCD.print(humidity());
-  LCD.CharGotoXY(80,32);
-  LCD.print((int) radiation());
-  LCD.CharGotoXY(80,48);
-  //LCD.print(analogRead(LOUDNESS));
-  LCD.print(env_factor(temp_opt, hum_opt, rad_opt) * 100);
-
+  LCD.CharGotoXY(60,24);
+  LCD.print(radiation());
+  LCD.CharGotoXY(60,32);
+  LCD.print(analogRead(LOUDNESS));
+  LCD.CharGotoXY(60,40);
+  LCD.print(env_factor(plant->temp_opt, plant->hum_opt, plant->rad_opt) * 100);
+  LCD.CharGotoXY(35,48);
+  LCD.print(loopno);
+  LCD.CharGotoXY(55,56);
+  LCD.print("   ");  //clear number
+  //print amount of packets that are currently in temp memory
+  LCD.CharGotoXY(55,56);
+  LCD.print(currentWriteAddressTempMem);
+  LCD.CharGotoXY(90,56);
+  LCD.print("    ");  //clear number
+  LCD.CharGotoXY(90,56);
+  //print amount of packets that are currently in eeprom
+  LCD.print((currentWriteAddress - sizeof(plant_info)) / sizeof(data));
 }

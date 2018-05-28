@@ -18,26 +18,42 @@ char* select_data_to_send(){
   return buffer;
 }
 
-// 0 = success, -1 = failure
+// 1 = success, 0 = failure
 int sending(){
   return 0;
 }
 
+//TODO
 char* recv_data(){
-  return "buffer";
+  char* buffer = (char*) malloc(sizeof(plant_info));
+  return buffer;
 }
 
 // update plant values
 void receiving(){
   plant_info* new_plant = (plant_info*) recv_data();
 
-  float temp_opt = new_plant->temp_opt;
-  float hum_opt = new_plant->hum_opt;
-  float rad_opt = new_plant->rad_opt;
-  float loud_opt = new_plant->loud_opt;
+  // only update plant if all data points of the old plant have been sent
+  if (currentWriteAddress == startWriteAddress && currentWriteAddressTempMem == 0)
+  {
+    Serial.println("received new plant. updating values.");
+    plant->temp_opt = new_plant->temp_opt;
+    plant->hum_opt = new_plant->hum_opt;
+    plant->rad_opt = new_plant->rad_opt;
+    plant->loud_opt = new_plant->loud_opt;
 
-  float temp_weight = new_plant->temp_weight;
-  float hum_weight = new_plant->hum_weight;
-  float rad_weight = new_plant->rad_weight;
-  float loud_weight = new_plant->loud_weight;
+    plant->temp_weight = new_plant->temp_weight;
+    plant->hum_weight = new_plant->hum_weight;
+    plant->rad_weight = new_plant->rad_weight;
+    plant->loud_weight = new_plant->loud_weight;
+
+    // save new plant to eeprom
+    write_data(0, (char*) plant, sizeof(plant_info));
+  }
+  else
+  {
+    Serial.println("not all data points of old plant have been sent. doing nothing...");
+  }
+
+  free(new_plant);
 }

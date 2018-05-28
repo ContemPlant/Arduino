@@ -1,5 +1,5 @@
 uint32_t get_time(){
-	return loopno;
+  return loopno;
 }
 
 void print_on_lcd() {

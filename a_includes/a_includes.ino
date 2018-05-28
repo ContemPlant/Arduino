@@ -67,5 +67,3 @@ void setup(){
 void loop(){
   loop2();
 }
-
-

@@ -53,7 +53,7 @@ void setup_vars(){
 void setup_lcd(){
   LCD.CleanAll(WHITE);    //Clean the screen with black or white.
     
-  //8*16 font size, auto new line, black character on white back ground.
+  //6*8 font size, auto new line, black character on white back ground.
   LCD.FontModeConf(Font_6x8, FM_ANL_AAA, BLACK_BAC); 
 
   //Set the start coordinate.

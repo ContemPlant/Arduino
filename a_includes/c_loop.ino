@@ -6,7 +6,7 @@ void loop2() {
 	Serial.println("getting sensor data...");
 	new_data->time = get_time();
 	new_data->comp = 1;
-	new_data->temp = temperature();
+	new_data->temp = temperature() * 10; //save a decimal place by multiplying by 10
 	new_data->hum = humidity();
 	new_data->rad = radiation();
 	new_data->loud = loudness();
@@ -21,9 +21,9 @@ void loop2() {
 	{
 		Serial.println("Send Success.");
 		// erase memory
-   Serial.println("Clear Temp Mem.");
+    Serial.println("Clear Temp Mem.");
 		clear_temp_mem();
-   Serial.println("Clear Perm Mem.");
+   	Serial.println("Clear Perm Mem.");
 		clear_perm_mem();
 	}
 	else
@@ -41,7 +41,7 @@ void loop2() {
   // write to eeprom if temp mem is full
   if (currentWriteAddressTempMem >= TEMP_MEMORY_SIZE)
   {
-		Serial.println("temp mem full. writing to eeprom...");
+	Serial.println("temp mem full. writing to eeprom...");
   	write_temp_to_perm();
   }
   loopno++;

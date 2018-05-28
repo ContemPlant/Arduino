@@ -31,29 +31,24 @@ char* recv_data(){
 
 // update plant values
 void receiving(){
-  plant_info* new_plant = (plant_info*) recv_data();
+  char* buffer = recv_data();
+  // new plant request
+  if (buffer[0] & NEW_PLANT_REQUEST){
+    Serial.println("received new plant.");
+    // only update plant if all data points of the old plant have been sent
+    if (currentWriteAddress == startWriteAddress && currentWriteAddressTempMem == 0)
+    {
+      Serial.println("updating values.");
+      memcpy(plant, &buffer[1], sizeof(plant_info));
 
-  // only update plant if all data points of the old plant have been sent
-  if (currentWriteAddress == startWriteAddress && currentWriteAddressTempMem == 0)
-  {
-    Serial.println("received new plant. updating values.");
-    plant->temp_opt = new_plant->temp_opt;
-    plant->hum_opt = new_plant->hum_opt;
-    plant->rad_opt = new_plant->rad_opt;
-    plant->loud_opt = new_plant->loud_opt;
-
-    plant->temp_weight = new_plant->temp_weight;
-    plant->hum_weight = new_plant->hum_weight;
-    plant->rad_weight = new_plant->rad_weight;
-    plant->loud_weight = new_plant->loud_weight;
-
-    // save new plant to eeprom
-    write_data(0, (char*) plant, sizeof(plant_info));
-  }
-  else
-  {
-    Serial.println("not all data points of old plant have been sent. doing nothing...");
+      // save new plant to eeprom
+      write_data(0, (char*) plant, sizeof(plant_info));
+    }
+    else
+    {
+      Serial.println("not all data points of old plant have been sent. doing nothing.");
+    }
   }
 
-  free(new_plant);
+  free(buffer);
 }

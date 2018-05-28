@@ -11,7 +11,6 @@
   #define DHTTYPE DHT22
   DHT dht(HUMIDITY_TEMPERATURE, DHTTYPE);
 
-
 //----radiation sensor----
   #include <Wire.h>
   #include "Arduino.h"
@@ -24,9 +23,11 @@
   uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
 
 //----define----
-  #define MEMORY_SIZE 1024
+  #define MEMORY_SIZE 1024    //measured in bytes
   #define TEMP_MEMORY_SIZE 16 //measured in packets
   #define DEFAULT_PLANT_ID 0
+  // flags
+  #define NEW_PLANT_REQUEST 1
   
 //----structs----
 typedef struct data_{
@@ -58,7 +59,7 @@ typedef struct plant_info_{
   int maxCompressionLevel;
   data** temp_mem;  //"temporary memory" for saving data packets
   plant_info* plant;  //store info about current plant
-  int loopno = 0;
+  int loopno = 0;   //number of loops executed
   
 void setup(){
   setup2();

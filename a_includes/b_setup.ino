@@ -25,7 +25,6 @@ void setup_vars(){
   if (EEPROM.get(0,i) == DEFAULT_PLANT_ID)
   {
     Serial.println("no plant in eeprom -> loading default values...");
-    plant->id = DEFAULT_PLANT_ID;
 
     plant->temp_opt = 23.0;
     plant->hum_opt = 50.0;
@@ -42,8 +41,8 @@ void setup_vars(){
     // load plant from eeprom
     Serial.print("plant found in eeprom -> loading plant...");
     read_data(0, (char*) plant, sizeof(plant));
-    Serial.print("loaded plant with id=");
-    Serial.print(plant->id);
+    Serial.print("loaded plant with temp_opt=");
+    Serial.print(plant->temp_opt);
     Serial.print("\n");
   }
 
@@ -58,7 +57,7 @@ void setup_lcd(){
 
   //Set the start coordinate.
   LCD.CharGotoXY(0,0);
-  LCD.println("ID: ");
+  LCD.println("temp_opt: ");
   LCD.println("Temp: ");
   LCD.println("Hum: ");
   LCD.println("Rad: ");
@@ -83,6 +82,9 @@ void setup_lcd(){
 void setup2() {
   Serial.begin(9600);
   Serial.println("Setting up...");
+
+  // Tell XBee to use Hardware Serial. It's also possible to use SoftwareSerial
+  xbee.setSerial(softwareSerial);
 
   //start i2c communication (LCD and Sunlight Sensor)
   Wire.begin();

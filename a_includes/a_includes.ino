@@ -6,6 +6,24 @@
   #define CLOCK D1
   #define LOUDNESS A3
 
+//--xbee--
+  // Xbee API Lib
+  #include <XBee.h>
+  #define PI_ADR 0x0
+
+  // Software serial com with xbee
+  #include <SoftwareSerial.h>
+  #define rxPin 3
+  #define txPin 4
+  SoftwareSerial softwareSerial(rxPin, txPin);
+
+  // Create an XBee object at the top of your sketch
+  XBee xbee = XBee();
+
+  // Setup response memory
+  Rx16Response rx16 = Rx16Response();
+
+
 //----humidity and temerature sensor----
   #include "DHT.h"
   #define DHTTYPE DHT22
@@ -27,7 +45,7 @@
   #define TEMP_MEMORY_SIZE 16 //measured in packets
   #define DEFAULT_PLANT_ID 0
   // flags
-  #define NEW_PLANT_REQUEST 1
+  #define NEW_PLANT_REQUEST 0b00000001
   
 //----structs----
 typedef struct data_{

@@ -18,14 +18,34 @@ char* select_data_to_send(){
   return buffer;
 }
 
+void sendStructTo(uint16_t addr16, data* payload) {
+  // Create a TX Request
+  Tx16Request zbTx = Tx16Request(addr16, (uint8_t*) payload, sizeof(data));
+  // Send your request
+  xbee.send(zbTx);
+}
+
+
 // 1 = success, 0 = failure
 int sending(){
-  return 0;
+  return 1;
 }
 
 //TODO
 char* recv_data(){
-  char* buffer = (char*) malloc(sizeof(plant_info));
+  char* buffer = (char*) malloc(sizeof(plant_info) + 1); //+1 for flags
+
+  xbee.readPacket();
+  if (xbee.getResponse().isAvailable()) {
+    if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
+      xbee.getResponse().getRx16Response(rx16);
+      for (int i = 0; i < rx16.getDataLength(); i++) { 
+        Serial.print(rx16.getData(i)); 
+        buffer[i] = rx16.getData(i);
+      } 
+    }
+  }
+
   return buffer;
 }
 
@@ -40,6 +60,7 @@ void receiving(){
     {
       Serial.println("updating values.");
       memcpy(plant, &buffer[1], sizeof(plant_info));
+      print_plant_info(plant);
 
       // save new plant to eeprom
       write_data(0, (char*) plant, sizeof(plant_info));

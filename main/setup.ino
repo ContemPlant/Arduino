@@ -40,7 +40,7 @@ void setup_vars(){
   {
     // load plant from eeprom
     Serial.print("plant found in eeprom -> loading plant...");
-    read_data(0, (char*) plant, sizeof(plant));
+    read_data(0, (uint8_t*) plant, sizeof(plant));
     Serial.print("loaded plant with temp_opt=");
     Serial.print(plant->temp_opt);
     Serial.print("\n");

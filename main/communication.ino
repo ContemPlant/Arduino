@@ -18,9 +18,20 @@ char* select_data_to_send(){
   return buffer;
 }
 
-void sendStructTo(uint16_t addr16, data* payload) {
+msg* packMsg(data* payload){
+  msg* msg_buffer = (msg*) malloc(sizeof(msg));
+  msg_buffer->timestamp = payload->time;
+  msg_buffer->compression = payload->comp;
+  msg_buffer->temp = payload->temp;
+  msg_buffer->hum = payload->hum;
+  msg_buffer->rad = payload->rad;
+  msg_buffer->loud = payload->loud;
+  return msg_buffer;
+}
+
+void sendStructTo(uint16_t addr16, msg* payload) {
   // Create a TX Request
-  Tx16Request zbTx = Tx16Request(addr16, (uint8_t*) payload, sizeof(data));
+  Tx16Request zbTx = Tx16Request(addr16, (uint8_t*) payload, sizeof(msg));
   // Send your request
   xbee.send(zbTx);
 }
@@ -34,7 +45,9 @@ int sending(){
   {
     Serial.print("sending packet number ");
     Serial.println(i);
-    sendStructTo(PI_ADR, buffer[i]);
+    msg* payload = packMsg(buffer[i]);
+    sendStructTo(PI_ADR, payload);
+    free(payload);
     delay(500);
   }
   return 1;

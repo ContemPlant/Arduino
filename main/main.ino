@@ -62,6 +62,17 @@ typedef struct data_{
   uint8_t loud;       //loudness in decibel
 }data;
 
+typedef struct msg_ {
+  uint8_t flags;
+  uint16_t sourceID;
+  int32_t timestamp;
+  uint8_t compression;
+  float temp;
+  float hum;
+  float rad;
+  float loud;
+}msg;
+
 typedef struct plant_info_{
   float temp_opt;
   float temp_weight;
@@ -107,6 +118,7 @@ void setup(){
     Serial.println("Setup finished.");
 
 }
+
 void loop(){
     // allocate memory for new data packet
   data* new_data = (data*) calloc(sizeof(data), 1);
@@ -146,7 +158,8 @@ void loop(){
     Serial.println("temp mem full. writing to eeprom...");
     write_temp_to_perm();
   }
+
   loopno++;
-  Serial.println("------end of loop------");
+  Serial.println("------end-of-loop------");
   delay(1000);
 }

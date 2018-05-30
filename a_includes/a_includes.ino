@@ -40,7 +40,6 @@ typedef struct data_{
 }data;
 
 typedef struct plant_info_{
-  uint32_t id;
   float temp_opt;
   float temp_weight;
   float hum_opt;

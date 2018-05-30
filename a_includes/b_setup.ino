@@ -81,6 +81,7 @@ void setup_lcd(){
 
 void setup2() {
   Serial.begin(9600);
+  softwareSerial.begin(9600);
   Serial.println("Setting up...");
 
   // Tell XBee to use Hardware Serial. It's also possible to use SoftwareSerial

@@ -28,6 +28,15 @@ void sendStructTo(uint16_t addr16, data* payload) {
 
 // 1 = success, 0 = failure
 int sending(){
+  int num_packets = currentWriteAddressTempMem + ((currentWriteAddress - startWriteAddress) / sizeof(plant_info));
+  data** buffer = (data**) select_data_to_send();
+  for (int i = 0; i < num_packets; ++i)
+  {
+    Serial.print("sending packet number ");
+    Serial.println(i);
+    sendStructTo(PI_ADR, buffer[i]);
+    delay(500);
+  }
   return 1;
 }
 
@@ -36,8 +45,11 @@ char* recv_data(){
   char* buffer = (char*) malloc(sizeof(plant_info) + 1); //+1 for flags
 
   xbee.readPacket();
+  Serial.println("test1");
   if (xbee.getResponse().isAvailable()) {
+    Serial.println("test2");
     if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
+      Serial.println("test3");
       xbee.getResponse().getRx16Response(rx16);
       for (int i = 0; i < rx16.getDataLength(); i++) { 
         Serial.print(rx16.getData(i)); 

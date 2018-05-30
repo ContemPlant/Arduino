@@ -42,10 +42,11 @@
 
 //----define----
   #define MEMORY_SIZE 1024    //measured in bytes
-  #define TEMP_MEMORY_SIZE 16 //measured in packets
+  #define TEMP_MEMORY_SIZE 1 //measured in packets
   #define DEFAULT_PLANT_ID 0
   // flags
-  #define NEW_PLANT_REQUEST 0b00000001
+  //#define NEW_PLANT_REQUEST 0b00000001
+  #define NEW_PLANT_REQUEST 1
   
 //----structs----
 typedef struct data_{
@@ -80,6 +81,7 @@ typedef struct plant_info_{
   
 void setup(){
   setup2();
+
 }
 void loop(){
   loop2();

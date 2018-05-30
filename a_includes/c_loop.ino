@@ -14,7 +14,6 @@ void loop2() {
   data* new_data = (data*) calloc(sizeof(data), 1);
 
   fill_in_sensor_data(new_data);
-  
 
   // save data in temp memory
   temp_mem[currentWriteAddressTempMem] = new_data;

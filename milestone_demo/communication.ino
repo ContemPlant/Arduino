@@ -19,7 +19,7 @@ char* select_data_to_send(){
 }
 
 msg* packMsg(data* payload){
-  msg* msg_buffer = (msg*) malloc(sizeof(msg));
+  msg* msg_buffer = (msg*) calloc(sizeof(msg), 1);
   msg_buffer->flags = DATA;
   msg_buffer->sourceID = ARD_ADR;
   msg_buffer->timestamp = payload->timestamp;
@@ -60,7 +60,7 @@ int sending(){
 
 //TODO
 char* recv_data(){
-  char* buffer = (char*) malloc(sizeof(plant_info) + 1); //+1 for flags
+  char* buffer = (char*) calloc(sizeof(plant_info)); 
 
   xbee.readPacket();
   Serial.println("test1");
@@ -112,7 +112,7 @@ void receiving(){
   }
   else
   {
-    Serial.println("Received packet with unknown flag");
+    Serial.println("Received packet with unknown flag or received nothing this time");
   }
 
   free(buffer);

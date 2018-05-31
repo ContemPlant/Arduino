@@ -133,7 +133,7 @@ void loop(){
   sendStructTo(PI_ADR, payload);
   free(payload);
   
-  // receive data
+  // receive data and update plant
   Serial.println("receiving data...");
   receiving();
 

@@ -107,7 +107,7 @@ void receiving(){
   }
   else
   {
-    Serial.println("Received packet with unknown flag");
+    Serial.println("Received packet with unknown flag or no packet received");
   }
 
   free(buffer);

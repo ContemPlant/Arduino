@@ -49,8 +49,8 @@
   #define TEMP_MEMORY_SIZE 1 //measured in packets
   #define DEFAULT_PLANT_ID 0
   // flags
-  //#define NEW_PLANT_REQUEST 0b00000001
-  #define NEW_PLANT_REQUEST 1
+  #define NEW_PLANT_REQUEST 0b00000001
+  #define UNLOAD 0b00000010
   
 //----structs----
 typedef struct data_{
@@ -74,6 +74,7 @@ typedef struct msg_ {
 }msg;
 
 typedef struct plant_info_{
+  uint8_t flags;
   float temp_opt;
   float temp_weight;
   float hum_opt;
@@ -93,6 +94,7 @@ typedef struct plant_info_{
   data** temp_mem;  //"temporary memory" for saving data packets
   plant_info* plant;  //store info about current plant
   int loopno = 0;   //number of loops executed
+  boolean active;
   
 void setup(){
     Serial.begin(9600);
@@ -125,9 +127,11 @@ void loop(){
 
   fill_in_sensor_data(new_data);
 
-  // save data in temp memory
-  temp_mem[currentWriteAddressTempMem] = new_data;
-  currentWriteAddressTempMem++;
+  // save data in temp memory if plant is active
+  if (active){
+    temp_mem[currentWriteAddressTempMem] = new_data;
+    currentWriteAddressTempMem++;
+  }
 
   // send data
   Serial.println("sending data...");

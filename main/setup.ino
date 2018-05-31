@@ -10,6 +10,18 @@ void setup_sensors(){
   }
 }
 
+void load_default_plant(){
+  plant->temp_opt = 23.0;
+  plant->hum_opt = 50.0;
+  plant->rad_opt = 500.0;
+  plant->loud_opt = 0.0;
+
+  plant->temp_weight = 1;
+  plant->hum_weight = 0.5;
+  plant->rad_weight = 0.7;
+  plant->loud_weight = 1;
+}
+
 //initialize global variables
 void setup_vars(){
   startWriteAddress = sizeof(plant_info);
@@ -21,20 +33,11 @@ void setup_vars(){
   plant = (plant_info*) malloc(sizeof(plant_info));
 
   // check if a plant is saved in eeprom
-  uint32_t i;
-  if (EEPROM.get(0,i) == DEFAULT_PLANT_ID)
+  if (EEPROM.[0] == DEFAULT_PLANT_ID)
   {
     Serial.println("no plant in eeprom -> loading default values...");
-
-    plant->temp_opt = 23.0;
-    plant->hum_opt = 50.0;
-    plant->rad_opt = 500.0;
-    plant->loud_opt = 0.0;
-
-    plant->temp_weight = 1;
-    plant->hum_weight = 0.5;
-    plant->rad_weight = 0.7;
-    plant->loud_weight = 1;
+    load_default_plant();
+    active = false;
   }
   else
   {
@@ -44,6 +47,7 @@ void setup_vars(){
     Serial.print("loaded plant with temp_opt=");
     Serial.print(plant->temp_opt);
     Serial.print("\n");
+    active = true;
   }
 
 }

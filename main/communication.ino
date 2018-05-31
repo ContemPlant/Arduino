@@ -84,16 +84,30 @@ void receiving(){
     if (currentWriteAddress == startWriteAddress && currentWriteAddressTempMem == 0)
     {
       Serial.println("updating values.");
-      memcpy(plant, &buffer[1], sizeof(plant_info));
+      memcpy(plant, buffer, sizeof(plant_info));
       print_plant_info(plant);
 
       // save new plant to eeprom
       write_data(0, (char*) plant, sizeof(plant_info));
+
+      // activate plant
+      active = true;
     }
     else
     {
       Serial.println("not all data points of old plant have been sent. doing nothing.");
     }
+  }
+  else if (buffer[0] & UNLOAD)
+  {
+    Serial.println("Deactivated plant. Loading default plant. Stop saving data.");
+    active = false;
+    EEPROM[0] = DEFAULT_PLANT_ID;
+    load_default_plant();
+  }
+  else
+  {
+    Serial.println("Received packet with unknown flag");
   }
 
   free(buffer);

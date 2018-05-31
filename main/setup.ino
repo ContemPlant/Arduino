@@ -33,7 +33,7 @@ void setup_vars(){
   plant = (plant_info*) malloc(sizeof(plant_info));
 
   // check if a plant is saved in eeprom
-  if (EEPROM.[0] == DEFAULT_PLANT_ID)
+  if (EEPROM[0] == DEFAULT_PLANT_ID)
   {
     Serial.println("no plant in eeprom -> loading default values...");
     load_default_plant();
@@ -43,7 +43,7 @@ void setup_vars(){
   {
     // load plant from eeprom
     Serial.print("plant found in eeprom -> loading plant...");
-    read_data(0, (uint8_t*) plant, sizeof(plant));
+    read_data(0, (char*) plant, sizeof(plant));
     Serial.print("loaded plant with temp_opt=");
     Serial.print(plant->temp_opt);
     Serial.print("\n");

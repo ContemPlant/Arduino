@@ -1,18 +1,18 @@
 // returns all data packets that were recorded since last successful sending operation in a single buffer
 char* select_data_to_send(){
-  char* buffer = (char*) calloc(currentWriteAddress + currentWriteAddressTempMem, 1);
+  char* buffer = (char*) calloc((currentWriteAddress - startWriteAddress) + currentWriteAddressTempMem, 1);
 
   // get data from eeprom
-  for (int i = 0; i < currentWriteAddress; ++i)
+  for (int i = 0; i < (currentWriteAddress - startWriteAddress); ++i)
   {
     buffer[i] = EEPROM[i];
   }
 
   // get data from temp mem
   char* read = (char*) temp_mem[0];
-  for (int j = currentWriteAddress; j < currentWriteAddress + currentWriteAddressTempMem * sizeof(data); ++j)
+  for (int j = (currentWriteAddress - startWriteAddress); j < (currentWriteAddress - startWriteAddress) + currentWriteAddressTempMem * sizeof(data); ++j)
   {
-    buffer[j] = read[j - currentWriteAddress];
+    buffer[j] = read[j - (currentWriteAddress - startWriteAddress)];
   }
 
   return buffer;
@@ -41,6 +41,8 @@ void sendStructTo(uint16_t addr16, msg* payload) {
 int sending(){
   int num_packets = currentWriteAddressTempMem + ((currentWriteAddress - startWriteAddress) / sizeof(plant_info));
   data** buffer = (data**) select_data_to_send();
+  Serial.print("sending packets: ");
+  Serial.println(num_packets);
   for (int i = 0; i < num_packets; ++i)
   {
     Serial.print("sending packet number ");

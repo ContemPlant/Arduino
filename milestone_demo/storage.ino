@@ -17,7 +17,7 @@ void read_data(int index, char* buffer, int size){
 // merges two packets a,b by building the average c. a should be recorded prior to b
 void merge_packets(data* a, data* b, data* c){
   Serial.println("merging packets...");
-  c->time = a->time;
+  c->timestamp = a->timestamp;
   c->comp = a->comp + b->comp;
   c->temp = (a->comp * a->temp + b->comp * b->temp) / (a->comp + b->comp);
   c->hum = (a->comp * a->hum + b->comp * b->hum) / (a->comp + b->comp);

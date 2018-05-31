@@ -5,7 +5,7 @@ uint32_t get_time(){
 void print_packet(data* p){
   Serial.print("#########\n");
   Serial.print("time: ");
-  Serial.print(p->time);
+  Serial.print(p->timestamp);
   Serial.print("\ncomp lvl: ");
   Serial.print(p->comp);
   Serial.print("\ntemp: ");

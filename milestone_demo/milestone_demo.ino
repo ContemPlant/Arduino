@@ -10,6 +10,7 @@
   // Xbee API Lib
   #include <XBee.h>
   #define PI_ADR 0x0
+  #define ARD_ADR 0x0001
 
   // Software serial com with xbee
   #include <SoftwareSerial.h>
@@ -51,10 +52,11 @@
   // flags
   #define SIGNIN  0b00000001
   #define SIGNOFF 0b00000010
+  #define DATA    0b00000011
   
 //----structs----
 typedef struct data_{
-  uint32_t time;      //minutes since 1900-01-01
+  uint32_t timestamp;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
   int16_t temp;        //temperature in deegrees celsius *10
   uint8_t hum;        //humidity in percent
@@ -148,5 +150,6 @@ void loop(){
 
   loopno++;
   Serial.println("------end-of-loop------");
+  free(new_data);
   delay(1000);
 }

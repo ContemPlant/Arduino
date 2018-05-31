@@ -1,6 +1,6 @@
 // returns all data packets that were recorded since last successful sending operation in a single buffer
 char* select_data_to_send(){
-  char* buffer = (char*) calloc(currentWriteAddress + currentWriteAddressTempMem, 1);
+  char* buffer = (char*) c(currentWriteAddress + currentWriteAddressTempMem, 1);
 
   // get data from eeprom
   for (int i = 0; i < currentWriteAddress; ++i)
@@ -20,7 +20,9 @@ char* select_data_to_send(){
 
 msg* packMsg(data* payload){
   msg* msg_buffer = (msg*) malloc(sizeof(msg));
-  msg_buffer->timestamp = payload->time;
+  msg_buffer->flags = DATA;
+  msg_buffer->sourceID = ARD_ADR;
+  msg_buffer->timestamp = payload->timestamp;
   msg_buffer->compression = payload->comp;
   msg_buffer->temp = payload->temp;
   msg_buffer->hum = payload->hum;

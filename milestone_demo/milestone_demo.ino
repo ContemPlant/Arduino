@@ -131,7 +131,8 @@ void loop(){
 
   msg* payload = packMsg(new_data);
   sendStructTo(PI_ADR, payload);
-
+  free(payload);
+  
   // receive data
   Serial.println("receiving data...");
   receiving();

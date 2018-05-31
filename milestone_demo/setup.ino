@@ -29,7 +29,7 @@ void setup_vars(){
   currentWriteAddressTempMem = 0;
   currentCompressionLevel = 0;
   maxCompressionLevel = 1;
-  temp_mem = (data**) malloc(TEMP_MEMORY_SIZE * sizeof(data*));
+  //temp_mem = (data**) malloc(TEMP_MEMORY_SIZE * sizeof(data*));
   plant = (plant_info*) malloc(sizeof(plant_info));
 
   // check if a plant is saved in eeprom

@@ -1,6 +1,6 @@
 // returns all data packets that were recorded since last successful sending operation in a single buffer
 char* select_data_to_send(){
-  char* buffer = (char*) c(currentWriteAddress + currentWriteAddressTempMem, 1);
+  char* buffer = (char*) (currentWriteAddress + currentWriteAddressTempMem, 1);
 
   // get data from eeprom
   for (int i = 0; i < currentWriteAddress; ++i)

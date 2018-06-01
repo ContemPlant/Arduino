@@ -60,7 +60,7 @@ int sending(){
 
 //TODO
 char* recv_data(){
-  char* buffer = (char*) calloc(sizeof(plant_info)); 
+  char* buffer = (char*) calloc(sizeof(plant_info), 1); 
 
   xbee.readPacket();
   Serial.println("test1");

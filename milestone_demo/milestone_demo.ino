@@ -58,10 +58,10 @@
 typedef struct data_{
   uint32_t timestamp;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
-  int16_t temp;        //temperature in deegrees celsius *10
-  uint8_t hum;        //humidity in percent
-  uint16_t rad;       //visible light in lumen
-  uint8_t loud;       //loudness in decibel
+  float temp;        //temperature in deegrees celsius *10
+  float hum;        //humidity in percent
+  float rad;       //visible light in lumen
+  float loud;       //loudness in decibel
 }data;
 
 typedef struct msg_ {

@@ -130,10 +130,12 @@ void loop(){
   fill_in_sensor_data(new_data);
 
   msg* payload = packMsg(new_data);
+  Serial.println("sending message.");
+  print_msg(payload);
   sendStructTo(PI_ADR, payload);
   free(payload);
   
-  // receive data
+  // receive data and update plant
   Serial.println("receiving data...");
   receiving();
 

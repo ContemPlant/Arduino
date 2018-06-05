@@ -48,7 +48,7 @@ data* queue_compress(queue* q){
     return cmp;
 }
 
-void queue_delete(queue* q) {
+void queue_empty(queue* q) {
     data* next;
     data* cur = q->first;
 
@@ -57,6 +57,4 @@ void queue_delete(queue* q) {
         free(cur);
         cur = next; 
     }
-
-    free(queue);
 }

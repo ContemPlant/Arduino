@@ -78,15 +78,6 @@ void store_packet(data* packet){
   compress_memory();
 }
 
-// free all packets in temp mem and reset write address
-void clear_temp_mem(){
-  for (int i = 0; i < currentWriteAddressTempMem; ++i)
-  {
-    free(temp_mem[i]);
-  }
-  currentWriteAddressTempMem = 0;
-}
-
 // reset write address
 void clear_perm_mem(){
   currentWriteAddress = startWriteAddress;
@@ -99,4 +90,8 @@ void write_temp_to_perm(){
     store_packet(temp_mem[i]);
   }
   clear_temp_mem();
+}
+
+void packet_to_eeprom(data*) {
+  
 }

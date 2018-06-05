@@ -31,11 +31,12 @@ msg* packMsg(data* payload){
   return msg_buffer;
 }
 
-void sendStructTo(uint16_t addr16, msg* payload) {
+boolean sendStructTo(uint16_t addr16, msg* payload) {
   // Create a TX Request
   Tx16Request zbTx = Tx16Request(addr16, (uint8_t*) payload, sizeof(msg));
   // Send your request
   xbee.send(zbTx);
+  return true;
 }
 
 

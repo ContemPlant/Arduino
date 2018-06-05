@@ -54,6 +54,8 @@
   #define SIGNOFF 0b00000010
   #define DATA    0b00000011
   
+  #define MAX_TRIES 3
+  #define END_CHAR 0b00000111
 //----structs----
 typedef struct data_{
   uint32_t timestamp;      //minutes since 1900-01-01
@@ -62,7 +64,14 @@ typedef struct data_{
   float hum;        //humidity in percent
   float rad;       //visible light in lumen
   float loud;       //loudness in decibel
+  data* next;
 }data;
+
+typedef struct queue_{
+  data* first;
+  data* last;
+  uint8_t count;
+}
 
 typedef struct msg_ {
   uint8_t flags;
@@ -93,10 +102,16 @@ typedef struct plant_info_{
   int currentWriteAddressTempMem;
   int currentCompressionLevel;
   int maxCompressionLevel;
-  data** temp_mem;  //"temporary memory" for saving data packets
+
+  int eepromPacketSpace = sizeof(plant_info) + 1;
+  int eepromMaxPackets = (EEPROM.length() - eepromPacketSpace)/(sizeof(data)-4); 
+  int eepromOldestPacket = 0;
+
   plant_info* plant;  //store info about current plant
   int loopno = 0;   //number of loops executed
   boolean active;
+
+  queue* packetQueue = queue_create();
   
 void setup(){
     Serial.begin(9600);
@@ -127,13 +142,31 @@ void loop(){
     // allocate memory for new data packet
   data* new_data = (data*) calloc(sizeof(data), 1);
 
+    //fill in sensor data and append packet to queue
   fill_in_sensor_data(new_data);
+  queue_apppend(packetQueue, new_data);
 
-  msg* payload = packMsg(new_data);
-  Serial.println("sending message.");
-  print_msg(payload);
-  sendStructTo(PI_ADR, payload);
-  free(payload);
+
+    //try to send packets in queue
+  uint8_t tries = 0;
+  while (packetQueue->count && tries < MAX_TRIES) {
+      msg* payload = packMsg(queue_peek(packetQueue));
+      Serial.println("sending message.");
+
+      if (sendStructTo(PI_ADR, payload)) {
+        free(queue_pop(packetQueue));
+        free(payload);
+        tries = 0;
+      }
+      else {
+        tries++;
+      }
+  }
+
+  if (packetQueue->count > 15) {
+    packet_to_eeprom(queue_compress(packetQueue));
+    queue_empty(packetQueue);
+  }
   
   // receive data and update plant
   Serial.println("receiving data...");

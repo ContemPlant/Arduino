@@ -6,7 +6,9 @@ queue* queue_create(){
     return q;
 }
 
-void queue_append(queue* q, data* new_elem) {
+void queue_append(queue* q, data* body) {
+    queue_elem* new_elem = malloc(sizeof(queue_elem));
+    new_elem->body = body;
     new_elem->next = NULL;
     if (q->last){
         q->first = new_elem;
@@ -20,7 +22,7 @@ void queue_append(queue* q, data* new_elem) {
 }
 
 data* queue_peek(queue* q) {
-    return q->first;
+    return q->first->body;
 }
 
 data* queue_pop(queue* q) {
@@ -32,28 +34,32 @@ data* queue_pop(queue* q) {
     }
     q->count--;
 
-    return q->first;
+    data* body = q->first->body;
+    free(q);
+    return body;
 }
 
 data* queue_compress(queue* q){
-    if (q->count < 2) {
-        return q->first;
+    if (q->count) {
+        data* cmp = malloc(sizeof(data));
+        memcpy(cmp, q->first->body, sizeof(data));
+
+        queue_elem* tmp = q->first->next;
+        while (tmp) {
+            merge_packets(cmp, tmp->body, cmp);
+            tmp = tmp->next;
+        }
+        return cmp;
     }
-    data* cmp = malloc(sizeof(data));
-    data* tmp = q->first->next;
-    while (tmp) {
-        merge_packets(cmp, tmp, cmp);
-        tmp = tmp->next;
-    }
-    return cmp;
 }
 
 void queue_empty(queue* q) {
-    data* next;
-    data* cur = q->first;
+    queue_elem* next;
+    queue_elem* cur = q->first;
 
     while(cur) {
         next = cur->next;
+        free(cur->body);
         free(cur);
         cur = next; 
     }

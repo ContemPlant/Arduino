@@ -57,6 +57,11 @@
   #define MAX_TRIES 3
   #define END_CHAR 0b00000111
 //----structs----
+typedef struct queue_elem_ {
+  data* body:
+  queue_elem* next;
+}queue_elem;
+
 typedef struct data_{
   uint32_t timestamp;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
@@ -64,7 +69,6 @@ typedef struct data_{
   float hum;        //humidity in percent
   float rad;       //visible light in lumen
   float loud;       //loudness in decibel
-  data* next;
 }data;
 
 typedef struct queue_{
@@ -103,9 +107,13 @@ typedef struct plant_info_{
   int currentCompressionLevel;
   int maxCompressionLevel;
 
-  int eepromPacketSpace = sizeof(plant_info) + 1;
-  int eepromMaxPackets = (EEPROM.length() - eepromPacketSpace)/(sizeof(data)-4); 
-  int eepromOldestPacket = 0;
+  uint16_t eepromPacketSpace = sizeof(plant_info) + 1;
+  uint16_t eepromMaxPackets = (EEPROM.length() - eepromPacketSpace)/sizeof(data); 
+  uint16_t eepromOldestPacket = eepromPacketSpace;
+  uint16_t eepromNumPackets = 0;
+
+  //stores the number of sending attempts
+  uint8_t tries = 0;
 
   plant_info* plant;  //store info about current plant
   int loopno = 0;   //number of loops executed
@@ -147,21 +155,7 @@ void loop(){
   queue_apppend(packetQueue, new_data);
 
 
-    //try to send packets in queue
-  uint8_t tries = 0;
-  while (packetQueue->count && tries < MAX_TRIES) {
-      msg* payload = packMsg(queue_peek(packetQueue));
-      Serial.println("sending message.");
-
-      if (sendStructTo(PI_ADR, payload)) {
-        free(queue_pop(packetQueue));
-        free(payload);
-        tries = 0;
-      }
-      else {
-        tries++;
-      }
-  }
+  send_queue();
 
   if (packetQueue->count > 15) {
     packet_to_eeprom(queue_compress(packetQueue));

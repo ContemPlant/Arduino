@@ -57,11 +57,6 @@
   #define MAX_TRIES 3
   #define END_CHAR 0b00000111
 //----structs----
-typedef struct queue_elem_ {
-  data* body:
-  queue_elem* next;
-}queue_elem;
-
 typedef struct data_{
   uint32_t timestamp;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
@@ -71,11 +66,17 @@ typedef struct data_{
   float loud;       //loudness in decibel
 }data;
 
+typedef struct queue_elem_ queue_elem;
+struct queue_elem_ {
+  data* body;
+  queue_elem* next;
+};
+
 typedef struct queue_{
-  data* first;
-  data* last;
+  queue_elem* first;
+  queue_elem* last;
   uint8_t count;
-}
+}queue;
 
 typedef struct msg_ {
   uint8_t flags;
@@ -119,7 +120,7 @@ typedef struct plant_info_{
   int loopno = 0;   //number of loops executed
   boolean active;
 
-  queue* packetQueue = queue_create();
+  queue* packetQueue;
   
 void setup(){
     Serial.begin(9600);
@@ -147,12 +148,13 @@ void setup(){
 }
 
 void loop(){
+  delay(100000);
     // allocate memory for new data packet
   data* new_data = (data*) calloc(sizeof(data), 1);
 
     //fill in sensor data and append packet to queue
   fill_in_sensor_data(new_data);
-  queue_apppend(packetQueue, new_data);
+  queue_append(packetQueue, new_data);
 
 
   send_queue();
@@ -170,13 +172,6 @@ void loop(){
   print_on_lcd();
 
   printTime();
-
-  // write to eeprom if temp mem is full
-  if (currentWriteAddressTempMem >= TEMP_MEMORY_SIZE)
-  {
-    Serial.println("temp mem full. writing to eeprom...");
-    write_temp_to_perm();
-  }
 
   loopno++;
   Serial.println("------end-of-loop------");

@@ -31,11 +31,12 @@ void setup_vars(){
   maxCompressionLevel = 1;
   //temp_mem = (data**) malloc(TEMP_MEMORY_SIZE * sizeof(data*));
   plant = (plant_info*) malloc(sizeof(plant_info));
+  packetQueue = queue_create();
 
   // check if a plant is saved in eeprom
-  if (EEPROM[0] == DEFAULT_PLANT_ID)
+  if (EEPROM[0] == SIGNOFF)
   {
-    Serial.println("no plant in eeprom -> loading default values...");
+    Serial.println("no active plant in eeprom -> loading default values...");
     load_default_plant();
     active = false;
   }
@@ -43,10 +44,8 @@ void setup_vars(){
   {
     // load plant from eeprom
     Serial.print("plant found in eeprom -> loading plant...");
-    read_data(0, (char*) plant, sizeof(plant));
-    Serial.print("loaded plant with temp_opt=");
-    Serial.print(plant->temp_opt);
-    Serial.print("\n");
+    read_eeprom(0, (char*) plant, sizeof(plant_info));
+    print_plant_info(plant);
     active = true;
   }
 

@@ -10,6 +10,7 @@
   // Xbee API Lib
   #include <XBee.h>
   #define PI_ADR 0x0
+  #define ARD_ADR 0x0001
 
   // Software serial com with xbee
   #include <SoftwareSerial.h>
@@ -51,16 +52,30 @@
   // flags
   #define SIGNIN  0b00000001
   #define SIGNOFF 0b00000010
+  #define DATA    0b00000011
   
+  #define MAX_TRIES 3
+  #define END_CHAR 0b00000111
 //----structs----
+typedef struct queue_elem_ {
+  data* body:
+  queue_elem* next;
+}queue_elem;
+
 typedef struct data_{
-  uint32_t time;      //minutes since 1900-01-01
+  uint32_t timestamp;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
-  int16_t temp;        //temperature in deegrees celsius *10
-  uint8_t hum;        //humidity in percent
-  uint16_t rad;       //visible light in lumen
-  uint8_t loud;       //loudness in decibel
+  float temp;        //temperature in deegrees celsius *10
+  float hum;        //humidity in percent
+  float rad;       //visible light in lumen
+  float loud;       //loudness in decibel
 }data;
+
+typedef struct queue_{
+  data* first;
+  data* last;
+  uint8_t count;
+}
 
 typedef struct msg_ {
   uint8_t flags;
@@ -91,10 +106,20 @@ typedef struct plant_info_{
   int currentWriteAddressTempMem;
   int currentCompressionLevel;
   int maxCompressionLevel;
-  data** temp_mem;  //"temporary memory" for saving data packets
+
+  uint16_t eepromPacketSpace = sizeof(plant_info) + 1;
+  uint16_t eepromMaxPackets = (EEPROM.length() - eepromPacketSpace)/sizeof(data); 
+  uint16_t eepromOldestPacket = eepromPacketSpace;
+  uint16_t eepromNumPackets = 0;
+
+  //stores the number of sending attempts
+  uint8_t tries = 0;
+
   plant_info* plant;  //store info about current plant
   int loopno = 0;   //number of loops executed
   boolean active;
+
+  queue* packetQueue = queue_create();
   
 void setup(){
     Serial.begin(9600);
@@ -125,12 +150,19 @@ void loop(){
     // allocate memory for new data packet
   data* new_data = (data*) calloc(sizeof(data), 1);
 
+    //fill in sensor data and append packet to queue
   fill_in_sensor_data(new_data);
+  queue_apppend(packetQueue, new_data);
 
-  msg* payload = packMsg(new_data);
-  sendStructTo(PI_ADR, payload);
 
-  // receive data
+  send_queue();
+
+  if (packetQueue->count > 15) {
+    packet_to_eeprom(queue_compress(packetQueue));
+    queue_empty(packetQueue);
+  }
+  
+  // receive data and update plant
   Serial.println("receiving data...");
   receiving();
 
@@ -148,5 +180,6 @@ void loop(){
 
   loopno++;
   Serial.println("------end-of-loop------");
+  free(new_data);
   delay(1000);
 }

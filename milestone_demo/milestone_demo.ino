@@ -148,7 +148,6 @@ void setup(){
 }
 
 void loop(){
-  delay(100000);
     // allocate memory for new data packet
   data* new_data = (data*) calloc(sizeof(data), 1);
 

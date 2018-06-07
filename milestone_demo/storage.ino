@@ -32,10 +32,21 @@ int packet_to_eeprom(data* packet) {
     return -1;
   }
   uint16_t index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (eepromNumPackets * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
-  EEPROM.put(index, packet);
+  EEPROM.put(index, *packet);
   EEPROM[index+sizeof(data)] = '\0';
   eepromNumPackets++;
 
   return 1;
+}
+
+uint8_t count_packets() {
+  uint16_t index = eepromOldestPacket;
+  uint8_t numPackets;
+  
+  while (EEPROM[index + sizeof(data)] != '\0') {
+    numPackets++;
+    index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (numPackets * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
+  }
+  return numPackets;
 }
 

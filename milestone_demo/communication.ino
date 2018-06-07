@@ -1,23 +1,3 @@
-// returns all data packets that were recorded since last successful sending operation in a single buffer
-char* select_data_to_send(){
-  char* buffer = (char*) (currentWriteAddress + currentWriteAddressTempMem, 1);
-
-  // get data from eeprom
-  for (int i = 0; i < currentWriteAddress; ++i)
-  {
-    buffer[i] = EEPROM[i];
-  }
-
-  // get data from temp mem
-  char* read = (char*) temp_mem[0];
-  for (int j = currentWriteAddress; j < currentWriteAddress + currentWriteAddressTempMem * sizeof(data); ++j)
-  {
-    buffer[j] = read[j - currentWriteAddress];
-  }
-
-  return buffer;
-}
-
 msg* packMsg(data* payload){
   msg* msg_buffer = (msg*) calloc(sizeof(msg), 1);
   msg_buffer->flags = DATA;
@@ -42,20 +22,20 @@ boolean sendStructTo(uint16_t addr16, msg* payload) {
 
 // 1 = success, 0 = failure
 int sending(){
-  int num_packets = currentWriteAddressTempMem + ((currentWriteAddress - startWriteAddress) / sizeof(plant_info));
-  data** buffer = (data**) select_data_to_send();
-  for (int i = 0; i < num_packets; ++i)
-  {
-    Serial.print("sending packet number ");
-    Serial.println(i);
-    msg* payload = packMsg(buffer[i]);
-    Serial.println("Sending packagae:\n\n");
-    print_packet(buffer[i]);
-    print_msg(payload);
-    sendStructTo(PI_ADR, payload);
-    free(payload);
-    delay(500);
-  }
+//  int num_packets = currentWriteAddressTempMem + ((currentWriteAddress - startWriteAddress) / sizeof(plant_info));
+//  data** buffer = (data**) select_data_to_send();
+//  for (int i = 0; i < num_packets; ++i)
+//  {
+//    Serial.print("sending packet number ");
+//    Serial.println(i);
+//    msg* payload = packMsg(buffer[i]);
+//    Serial.println("Sending packagae:\n\n");
+//    print_packet(buffer[i]);
+//    print_msg(payload);
+//    sendStructTo(PI_ADR, payload);
+//    free(payload);
+//    delay(500);
+//  }
   return 1;
 }
 
@@ -94,7 +74,7 @@ void receiving(){
       print_plant_info(plant);
 
       // save new plant to eeprom
-      EEPROM.put(0, plant);
+      write_eeprom(0, (char*) plant, sizeof(plant_info));
 
       // activate plant
       active = true;
@@ -108,7 +88,7 @@ void receiving(){
   {
     Serial.println("Deactivated plant. Loading default plant. Stop saving data.");
     active = false;
-    EEPROM[0] = DEFAULT_PLANT_ID;
+    EEPROM[0] = SIGNOFF;
     load_default_plant();
   }
   else
@@ -119,7 +99,7 @@ void receiving(){
   free(buffer);
 }
 
-send_queue() {
+void send_queue() {
   //try to send packets in queue
   while (packetQueue->count && tries < MAX_TRIES) {
       msg* payload = packMsg(queue_peek(packetQueue));
@@ -137,13 +117,14 @@ send_queue() {
 }
 
 int send_eeprom() {
-  data* buffer = malloc(sizeof(data));
+  data* buffer = (data*) malloc(sizeof(data));
   tries = 0;
   uint8_t packet = 0;
+  uint16_t index = 0;
   
   while(eepromNumPackets - packet && tries < MAX_TRIES) {
 
-    uint16_t index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (packet * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
+    index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (packet * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
     EEPROM.get(index, buffer);
     msg* payload = packMsg(buffer);
 

@@ -21,8 +21,8 @@ void print_packet(data* p){
 
 void print_plant_info(plant_info* p){
   Serial.print("#########\n");
-  //Serial.print("id: ");
-  //Serial.print(p->id);
+  Serial.print("flags: ");
+  Serial.print(p->flags);
   Serial.print("\ntemp opt: ");
   Serial.print(p->temp_opt);
   Serial.print("\ntemp weight: ");

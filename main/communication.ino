@@ -41,6 +41,8 @@ void sendStructTo(uint16_t addr16, msg* payload) {
 int sending(){
   int num_packets = currentWriteAddressTempMem + ((currentWriteAddress - startWriteAddress) / sizeof(plant_info));
   data** buffer = (data**) select_data_to_send();
+  Serial.print("sending packets: ");
+  Serial.println(num_packets);
   for (int i = 0; i < num_packets; ++i)
   {
     Serial.print("sending packet number ");

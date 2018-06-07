@@ -1,11 +1,18 @@
 // write size bytes from buffer to index
-void write_data(int index, char* buffer, int size){
+void write_eeprom(int index, char* buffer, int size){
   for (int i = 0; i < size; ++i)
   {
     EEPROM[index+i] = buffer[i];
   }
 }
 
+// read size bytes from eeprom at index and write the content into buffer
+void read_eeprom(int index, char* buffer, int size){
+  for (int i = 0; i < size; ++i)
+  {
+    buffer[i] = EEPROM[index+i];
+  }
+}
 
 // merges two packets a,b by building the average c. a should be recorded prior to b, also works if a and c ar identical
 void merge_packets(data* a, data* b, data* c){
@@ -21,8 +28,8 @@ void merge_packets(data* a, data* b, data* c){
 
 
 int packet_to_eeprom(data* packet) {
-  if (eepromMaxPackets =< eepromNumPackets) {
-    return -1
+  if (eepromMaxPackets <= eepromNumPackets) {
+    return -1;
   }
   uint16_t index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (eepromNumPackets * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
   EEPROM.put(index, packet);

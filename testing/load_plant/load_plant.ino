@@ -1,6 +1,11 @@
 //----EEPROM----
   #include <EEPROM.h>
 
+  // flags
+  #define SIGNIN  0b00000001
+  #define SIGNOFF 0b00000010
+  #define DATA    0b00000011
+
 
 typedef struct plant_info_{
   uint8_t flags;
@@ -17,7 +22,7 @@ typedef struct plant_info_{
 plant_info* plant;  //store info about current plant
 
 void load_default_plant(){
-	plant->flags = SIGNOFF;
+	plant->flags = SIGNIN;
   plant->temp_opt = 23.0;
   plant->hum_opt = 50.0;
   plant->rad_opt = 500.0;
@@ -29,11 +34,19 @@ void load_default_plant(){
   plant->loud_weight = 1;
 }
 
+// write size bytes from buffer to index
+void write_eeprom(int index, char* buffer, int size){
+  for (int i = 0; i < size; ++i)
+  {
+    EEPROM[index+i] = buffer[i];
+  }
+}
+
 //initialize global variables
 void setup_vars(){
   plant = (plant_info*) malloc(sizeof(plant_info));
   load_default_plant();
-  EEPROM.put(0, plant);
+  write_eeprom(0, (char*) plant, sizeof(plant_info));
 }
 
 void setup(){

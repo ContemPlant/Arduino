@@ -1,5 +1,5 @@
 queue* queue_create(){
-    queue* q = malloc(sizof(queue));
+    queue* q = (queue*) malloc(sizeof(queue));
     q->first = NULL;
     q->last = NULL;
     q->count = 0;
@@ -7,7 +7,7 @@ queue* queue_create(){
 }
 
 void queue_append(queue* q, data* body) {
-    queue_elem* new_elem = malloc(sizeof(queue_elem));
+    queue_elem* new_elem = (queue_elem*) malloc(sizeof(queue_elem));
     new_elem->body = body;
     new_elem->next = NULL;
     if (q->last){
@@ -29,7 +29,7 @@ data* queue_pop(queue* q) {
     if (q->first){
         q->first = q->first->next;
         if (q->count == 1) {
-            q->last = NULL
+            q->last = NULL;
         }
     }
     q->count--;
@@ -41,7 +41,7 @@ data* queue_pop(queue* q) {
 
 data* queue_compress(queue* q){
     if (q->count) {
-        data* cmp = malloc(sizeof(data));
+        data* cmp = (data*) malloc(sizeof(data));
         memcpy(cmp, q->first->body, sizeof(data));
 
         queue_elem* tmp = q->first->next;

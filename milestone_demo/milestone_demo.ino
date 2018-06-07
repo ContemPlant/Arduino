@@ -46,7 +46,7 @@
 
 //----define----
   #define MEMORY_SIZE 1024    //measured in bytes
-  #define TEMP_MEMORY_SIZE 2 //measured in packets
+  #define TEMP_MEMORY_SIZE 1 //measured in packets
   #define DEFAULT_PLANT_ID 0
   // flags
   #define SIGNIN  0b00000001

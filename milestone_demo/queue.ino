@@ -1,16 +1,15 @@
 queue* queue_create(){
-    queue* q = (queue*) malloc(sizeof(queue));
-    q->first = NULL;
-    q->last = NULL;
-    q->count = 0;
-    return q;
+    return (queue*) calloc(sizeof(queue), 1);
 }
 
-void queue_append(queue* q, data* body) {
+boolean queue_append(queue* q, data* body) {
+    if(!q) return false;
+
     queue_elem* new_elem = (queue_elem*) malloc(sizeof(queue_elem));
     new_elem->body = body;
     new_elem->next = NULL;
-    if (q->last){
+
+    if (!q->last){
         q->first = new_elem;
         q->last = new_elem;
     }
@@ -19,6 +18,7 @@ void queue_append(queue* q, data* body) {
         q->last = new_elem;
     }
     q->count++;
+    return true;
 }
 
 data* queue_peek(queue* q) {
@@ -26,16 +26,16 @@ data* queue_peek(queue* q) {
 }
 
 data* queue_pop(queue* q) {
-    if (q->first){
-        q->first = q->first->next;
-        if (q->count == 1) {
-            q->last = NULL;
-        }
-    }
-    q->count--;
+    if (!q || !q->first) return NULL;
 
-    data* body = q->first->body;
-    free(q);
+    queue_elem* tmp = q->first;
+    data* body = tmp->body;
+    q->first = q->first->next;
+
+    if (!q->first) q->last = NULL;
+
+    free(tmp);
+    q->count--;
     return body;
 }
 
@@ -50,6 +50,9 @@ data* queue_compress(queue* q){
             tmp = tmp->next;
         }
         return cmp;
+    }
+    else{
+        return NULL;
     }
 }
 

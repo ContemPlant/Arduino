@@ -64,8 +64,7 @@ void receiving(){
   if (buffer[0] & SIGNIN){
     Serial.println("received new plant.");
     // only update plant if all data points of the old plant have been sent
-    if (currentWriteAddress == startWriteAddress && currentWriteAddressTempMem == 0)
-    {
+    if (true){
       Serial.println("updating values.");
       memcpy(plant, buffer, sizeof(plant_info));
       print_plant_info(plant);
@@ -75,21 +74,22 @@ void receiving(){
 
       // activate plant
       active = true;
+      // switch lcd display
+      setup_lcd();
     }
-    else
-    {
+    else{
       Serial.println("not all data points of old plant have been sent. doing nothing.");
     }
   }
-  else if (buffer[0] & SIGNOFF)
-  {
+  else if (buffer[0] & SIGNOFF){
     Serial.println("Deactivated plant. Loading default plant. Stop saving data.");
     active = false;
     EEPROM[0] = SIGNOFF;
-    load_default_plant();
+    // switch lcd display
+    setup_lcd();
+    load_default_plant(); //not needed anymore?
   }
-  else
-  {
+  else{
     Serial.println("Received packet with unknown flag or received nothing this time");
   }
 
@@ -101,18 +101,18 @@ void send_queue() {
   
   //try to send packets in queue
   while (packetQueue->count && tries < MAX_TRIES) {
-      msg* payload = packMsg(queue_peek(packetQueue));
-      Serial.println("sending message.");
+    msg* payload = packMsg(queue_peek(packetQueue));
+    Serial.println("sending message.");
 
-      if (sendStructTo(PI_ADR, payload)) {
-        free(queue_pop(packetQueue));
-        tries = 0;
-      }
-      else {
-        tries++;
-      }
+    if (sendStructTo(PI_ADR, payload)) {
+      free(queue_pop(packetQueue));
+      tries = 0;
+    }
+    else {
+      tries++;
+    }
 
-      free(payload);
+    free(payload);
   }
 }
 

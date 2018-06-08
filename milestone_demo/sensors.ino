@@ -27,4 +27,3 @@ void fill_in_sensor_data(data* new_data) {
   new_data->loud = loudness();
 }
 
-

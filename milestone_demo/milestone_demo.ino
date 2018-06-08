@@ -6,7 +6,7 @@
   #define CLOCK D1
   #define LOUDNESS A3
 
-//--xbee--
+//----XBEE----
   // Xbee API Lib
   #include <XBee.h>
   #define PI_ADR 0x0
@@ -23,7 +23,6 @@
 
   // Setup response memory
   Rx16Response rx16 = Rx16Response();
-
 
 //----humidity and temerature sensor----
   #include "DHT.h"
@@ -47,7 +46,8 @@
 
 //----define----
   #define MEMORY_SIZE 1024    //measured in bytes
-  #define TEMP_MEMORY_SIZE 1 //measured in packets
+  #define TEMP_MEMORY_SIZE 2 //measured in packets
+  #define QUEUE_SIZE 16
   #define DEFAULT_PLANT_ID 0
   // flags
   #define SIGNIN  0b00000001
@@ -56,6 +56,7 @@
   
   #define MAX_TRIES 3
   #define END_CHAR 0b00000111
+
 //----structs----
 typedef struct data_{
   uint32_t timestamp;      //minutes since 1900-01-01
@@ -133,9 +134,9 @@ void setup(){
     //start i2c communication (LCD and Sunlight Sensor)
     Wire.begin();
 
-    clock.begin();
     //set up sensors
     setup_sensors();
+    clock.begin();
 
     //initialize global variables and load plant
     setup_vars();
@@ -155,14 +156,13 @@ void loop(){
   fill_in_sensor_data(new_data);
   queue_append(packetQueue, new_data);
 
-
   send_queue();
 
-  if (packetQueue->count > 15) {
+  if (packetQueue->count >= QUEUE_SIZE) {
     packet_to_eeprom(queue_compress(packetQueue));
     queue_empty(packetQueue);
   }
-  
+  // ------
   // receive data and update plant
   Serial.println("receiving data...");
   receiving();

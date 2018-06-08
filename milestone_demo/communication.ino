@@ -44,11 +44,8 @@ char* recv_data(){
   char* buffer = (char*) calloc(sizeof(plant_info), 1); 
 
   xbee.readPacket();
-  Serial.println("test1");
   if (xbee.getResponse().isAvailable()) {
-    Serial.println("test2");
     if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
-      Serial.println("test3");
       xbee.getResponse().getRx16Response(rx16);
       for (int i = 0; i < rx16.getDataLength(); i++) { 
         Serial.print(rx16.getData(i)); 
@@ -100,6 +97,8 @@ void receiving(){
 }
 
 void send_queue() {
+  tries = 0;
+  
   //try to send packets in queue
   while (packetQueue->count && tries < MAX_TRIES) {
       msg* payload = packMsg(queue_peek(packetQueue));
@@ -107,12 +106,13 @@ void send_queue() {
 
       if (sendStructTo(PI_ADR, payload)) {
         free(queue_pop(packetQueue));
-        free(payload);
         tries = 0;
       }
       else {
         tries++;
       }
+
+      free(payload);
   }
 }
 

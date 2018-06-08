@@ -1,4 +1,3 @@
-
 void print_on_lcd() {
   LCD.CharGotoXY(60,0);
   //LCD.print(plant->id);

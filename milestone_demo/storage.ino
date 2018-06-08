@@ -28,7 +28,7 @@ void merge_packets(data* a, data* b, data* c){
 
 
 int packet_to_eeprom(data* packet) {
-  if (eepromMaxPackets <= eepromNumPackets) {
+  if (eepromMaxPackets <= eepromNumPackets || !packet) {
     return -1;
   }
   uint16_t index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (eepromNumPackets * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));

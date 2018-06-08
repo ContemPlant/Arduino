@@ -53,31 +53,12 @@ void setup_vars(){
 
 // set up lcd screen
 void setup_lcd(){
-  LCD.CleanAll(WHITE);    //Clean the screen with black or white.
-    
-  //6*8 font size, auto new line, black character on white back ground.
-  LCD.FontModeConf(Font_6x8, FM_ANL_AAA, BLACK_BAC); 
-
-  //Set the start coordinate.
-  LCD.CharGotoXY(0,0);
-  LCD.println("temp_opt: ");
-  LCD.println("Temp: ");
-  LCD.println("Hum: ");
-  LCD.println("Rad: ");
-  LCD.println("Loud: ");
-  LCD.println("Env: ");
-  LCD.println("loop: ");
-  LCD.println("memory t:    p:");
-  // print units
-  LCD.CharGotoXY(100,8);
-  LCD.print("C");
-  LCD.CharGotoXY(100,16);
-  LCD.print("%");
-  LCD.CharGotoXY(100,24);
-  LCD.print("lm");
-  LCD.CharGotoXY(100,32);
-  LCD.print("db");
-  LCD.CharGotoXY(100,40);
-  LCD.print("%");
-
+  if (active){
+    lcd_setup_sensors();
+    lcd_setup_loop();
+    lcd_setup_clock();
+  }
+  else{
+    lcd_setup_id(); //prepare screen for displaying arduino id
+  }
 }

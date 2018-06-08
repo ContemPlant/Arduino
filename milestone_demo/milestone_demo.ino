@@ -3,6 +3,7 @@
 
 //define sensor pins
   #define HUMIDITY_TEMPERATURE 2
+  #define BUTTON 5
   #define CLOCK D1
   #define LOUDNESS A3
 
@@ -134,14 +135,19 @@ void setup(){
     //start i2c communication (LCD and Sunlight Sensor)
     Wire.begin();
 
+    // setup button
+    pinMode(BUTTON, INPUT);
+    
     //set up sensors
+    Serial.println("test");
     setup_sensors();
+    
     clock.begin();
 
     //initialize global variables and load plant
     setup_vars();
 
-    // set up lcd screen
+    // set up lcd screen, this needs to be called after setup_vars()!
     setup_lcd();
 
     Serial.println("Setup finished.");
@@ -149,31 +155,48 @@ void setup(){
 }
 
 void loop(){
+  if (active){
     // allocate memory for new data packet
-  data* new_data = (data*) calloc(sizeof(data), 1);
+    data* new_data = (data*) calloc(sizeof(data), 1);
 
     //fill in sensor data and append packet to queue
-  fill_in_sensor_data(new_data);
-  queue_append(packetQueue, new_data);
+    fill_in_sensor_data(new_data);
+    queue_append(packetQueue, new_data);
 
-  send_queue();
+    send_queue();
 
-  if (packetQueue->count >= QUEUE_SIZE) {
-    packet_to_eeprom(queue_compress(packetQueue));
-    queue_empty(packetQueue);
+    if (packetQueue->count >= QUEUE_SIZE) {
+      packet_to_eeprom(queue_compress(packetQueue));
+      queue_empty(packetQueue);
+    }
+
+    // print environment parameters
+    lcd_print_sensors();
+    lcd_print_loop();
+    lcd_print_clock();
+
+    //check button press
+    if (digitalRead(BUTTON)){
+      Serial.println("pressed button. deactivating plant");
+      active = false;
+      EEPROM[0] = SIGNOFF;
+      // switch lcd display
+      setup_lcd();
+    }
   }
-  // ------
+  else{
+    Serial.println("plant not active.");
+    lcd_print_id();
+  } 
+
   // receive data and update plant
   Serial.println("receiving data...");
   receiving();
 
-  // print environment parameters
-  print_on_lcd();
-
-  printTime();
+  // print time on serial
+  //printTime();
 
   loopno++;
   Serial.println("------end-of-loop------");
-  free(new_data);
   delay(1000);
 }

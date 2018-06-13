@@ -1,4 +1,3 @@
-
 float temperature() {
   return dht.readTemperature();
 }
@@ -25,5 +24,22 @@ void fill_in_sensor_data(data* new_data) {
   new_data->hum = humidity();
   new_data->rad = radiation();
   new_data->loud = loudness();
+}
+
+boolean validData(char sensor, float data){
+  switch(sensor){
+    case 't':
+      if (data < -40.0 || data > 80.0) return false;
+      return true;
+    case 'h':
+      if (data < 0.0 || data > 100.0) return false;
+      return true;
+    case 'r':
+      
+      break;
+    case 'l':
+      if (data < 0.0) return false;
+      return true;
+  }
 }
 

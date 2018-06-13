@@ -1,17 +1,33 @@
 float temperature() {
-  return dht.readTemperature();
+    for(int i=0; i<5; i++){
+      float temp = dht.readTemperature();
+      if (validData('t', temp)) return temp;
+    }
+    return 0.0;//return something schlau
 }
 
 float humidity() {
-  return dht.readHumidity();
+  for(int i=0; i<5; i++){
+      float hum = dht.readHumidity();
+      if (validData('h', hum)) return hum;
+    }
+    return 0.0;//s. temp
 }
 
 float radiation() {
-  return radsens.ReadVisible();
+    for(int i=0; i<5; i++){
+      float rad = radsens.ReadVisible();
+      if (validData('r', rad)) return rad;
+    }
+  return 0.0;//s. temp
 }
 
 float loudness(){
-  return analogRead(LOUDNESS);
+  for(int i=0; i<5; i++){
+      float loud = analogRead(LOUDNESS);
+      if (validData('l', loud)) return loud;
+    }
+    return 0.0;//s. temp
 }
 
 void fill_in_sensor_data(data* new_data) {
@@ -35,8 +51,8 @@ boolean validData(char sensor, float data){
       if (data < 0.0 || data > 100.0) return false;
       return true;
     case 'r':
-      
-      break;
+      if (data < 0.0) return false;
+      return true;
     case 'l':
       if (data < 0.0) return false;
       return true;

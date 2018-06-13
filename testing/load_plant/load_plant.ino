@@ -22,7 +22,7 @@ typedef struct plant_info_{
 plant_info* plant;  //store info about current plant
 
 void load_default_plant(){
-	plant->flags = SIGNOFF;
+	plant->flags = SIGNIN;
   plant->temp_opt = 23.0;
   plant->hum_opt = 50.0;
   plant->rad_opt = 500.0;

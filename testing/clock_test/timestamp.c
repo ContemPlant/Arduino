@@ -19,8 +19,3 @@ int32_t seconds_from_date(uint8_t second, uint8_t minute, uint8_t hour, uint8_t 
     int32_t seconds = days*86400 + minute*60 + hour*3600 + second;
     return seconds;
 }
-
-int32_t timestamp() {
-    clock.getTime();
-    return seconds_from_date(clock.second, clock.minute, clock.hour, clock.dayOfMonth, clock.month, clock.year);
-}

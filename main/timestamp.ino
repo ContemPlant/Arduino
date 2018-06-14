@@ -16,7 +16,6 @@ uint16_t days_from_month(uint8_t month, bool leap) {
 int32_t seconds_from_date(uint8_t second, uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint16_t year) {
     uint16_t days = days_from_year(year);
     days += days_from_month(month, year%4 == 0);
-    days += days - 1;
     int32_t seconds = days*86400 + minute*60 + hour*3600 + second;
     return seconds;
 }

@@ -94,6 +94,35 @@ Dient zur Kommunikation mit dem Raspberry PI über eine Funkverbindung.
 %Was passiert in Ausnahmefällen
 \newpage
 
+\section{Simulation}
+
+\subsection{Die Umgebungsfunktion}
+
+Gesucht wurde eine Funktion, die aus den eingelesenen Sensordaten einen Wert berechnet, der angibt wie gut die Umgebungsvariablen (Helligkeit, Temperatur, Luftfeuchtigkeit, Lautstärke) für die Pflanze sind.\\
+Der User gibt für jede Umgebungsvariable seinen Optimalwert (der Wert bei dem er am besten Lernen kann, bspw. 20°C für die Temperatur) und die Gewichtung an, je nachdem wie stark die jeweilige Umgebungsvariable den berechneten Umgebungswert beeinflussen soll. Der Hintergedanke hierbei war, dass jeder User weiß, unter welchen Bedingungen er am besten lernen kann.\\
+Die Abweichung der Umgebungsvariable von dem Optimalwert soll also den Umgebungswert negativ beeinflussen. Hierzu haben wir uns folgende Kriterien überlegt:\\
+- Bei kleineren Abweichungen sollte der Umgebungswert erst nicht so schnell fallen.\\
+- Es sollte eine maximale Abweichung geben, ab der der Wert stets 0 ist für die jeweilige Umgebungsvariable.\\
+Die Funktion sieht wiefolgt aus, wobei auf der x-Achse die Abweichung vom Optimalwert dargestellt wird:\\
+
+\begin{figure*}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{fnct.png}
+\caption{max = 20}
+\end{figure*}
+
+\begin{align*}
+f(x) = 
+\frac{2}{max^3} \cdot x^3 - \frac{3}{max^2}\cdot x^2 + 1
+\end{align*}
+
+Seien $f_i$ die Werte die die Umgebungsfunktion für den Sensor i ausgibt und seien $w_i$ die Gewichtung des jeweiligen Sensors. Dann berechnet man den Umgebungswert für n Sensoren folgendermaßen:
+
+\begin{align*}
+env(\boldsymbol{f},\boldsymbol{w}) = \sum_{i=0}^{n} (f_i \cdot w_i)
+\end{align*}
+
+
 \section{Errorhandling}
 \subsection{Raspberry PI nicht erreichbar}
 Wenn der Raspberry PI nicht erreichbar ist speichert der Arduino alle nicht-versendbaren Pakete und schickt diese, sobald wieder eine Verbindung besteht.\newline

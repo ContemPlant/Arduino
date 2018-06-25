@@ -1,76 +1,38 @@
 #include <qrcodegen.h>
 
-//----XBEE----
-  // Xbee API Lib
-  #include <XBee.h>
-  #define PI_ADR 0x0
-  #define ARD_ADR 0x0001
-
-  // Software serial com with xbee
-  #include <SoftwareSerial.h>
-  #define rxPin 3
-  #define txPin 4
-  SoftwareSerial softwareSerial(rxPin, txPin);
-
-  // Create an XBee object at the top of your sketch
-  XBee xbee = XBee();
-
-  // Setup response memory
-  Rx16Response rx16 = Rx16Response();
-
 //----lcd display----
   #include <I2C_LCD.h>
   I2C_LCD LCD;
   uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
 
-char* recv_data(){
-  char* buffer = (char*) calloc(10, 1); 
+char qrcode[] = "1111111011001101110100111111110000010101000010111101000001101110101000100111010010111011011101001010100100100101110110111010110010100101001011101100000100101111011011010000011111111010101010101010111111100000000011111010011000000000100111111000110011011100101111001100111011101111100010100100100010011011101111100011111110000010100010011001000000001100011000000001011101110101011001101100100110111011001111000101110110101101101010000010010110001011011001001110110000010110001101000111000010111111100001000101101001011000011100011010101101010100110101111010101110001101010100111011111000110100110101011111110000000000010001111001010001101011111110100101000101101010111100000101010110001111000101111011101010000101000011111110010111010111111110101100000010101110100100101101101011101111000001000010011101110110110011111110101110101011011010110";
 
-  xbee.readPacket();
-  if (xbee.getResponse().isAvailable()) {
-    if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
-      xbee.getResponse().getRx16Response(rx16);
-      for (int i = 0; i < rx16.getDataLength(); i++) { 
-        Serial.print(rx16.getData(i)); 
-        buffer[i] = rx16.getData(i);
-      } 
+void lcd_print_qr(char* qr, int len){
+  int vert_size = sqrt(len);
+  for(int i = 0; i < len; i++)
+  {
+    if (qr[i] == '1') {
+      // draw 2x2 rectangle
+      LCD.DrawRectangleAt(2 * (i % vert_size), 2 * (i / vert_size), 2, 2, BLACK_FILL);
     }
   }
-
-  return buffer;
-}
-
-// Creates a single QR Code, then prints it to the console.
-static void doBasicDemo(void) {
-  const char *text = "Hello, world!";  // User-supplied text
-  enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
   
-  // Make and print the QR Code symbol
-  uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
-  uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-  bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
-    qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
-  if (ok)
-    printQr(qrcode);
-  else
-    printf("error\n");
 }
-
 
 void setup(){
   Serial.begin(9600);
-  softwareSerial.begin(9600);
   Serial.println("Setting up...");
 
   Wire.begin();
 
-  // Tell XBee to use Hardware Serial. It's also possible to use SoftwareSerial
-  xbee.setSerial(softwareSerial);
-
   Serial.println("Setup finished.");
 
   LCD.CleanAll(WHITE);    //Clean the screen with black or white.
-  LCD.DrawVLineAt(0, 63, 20, BLACK);
+  LCD.DrawDotAt(127, 63, BLACK);
+  int len = strlen(qrcode);
+  Serial.print("länge: ");
+  Serial.println(len);
+  lcd_print_qr(qrcode, strlen(qrcode));
 }
 
 void loop(){

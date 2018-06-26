@@ -28,13 +28,16 @@ boolean recv_ack(){
       Serial.println("got a response!");
         // should be a znet tx status             
       if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
+        Serial.println("got a TX_STATUS_RESPONSE response!");
          xbee.getResponse().getZBTxStatusResponse(txStatus);
         
          // get the delivery status, the fifth byte
            if (txStatus.getStatus() == SUCCESS) {
               // success.  time to celebrate
+              Serial.println("ack received!");
            } else {
               // the remote XBee did not receive our packet. is it powered on?
+              Serial.println("no ack!");
            }
         }      
     } else {

@@ -170,6 +170,9 @@ void loop(){
     fill_in_sensor_data(new_data);
     queue_append(packetQueue, new_data);
 
+    // if (eepromNumPackets != 0){
+    //   send_eeprom();
+    // }
     send_queue();
 
     if (packetQueue->count >= QUEUE_SIZE) {

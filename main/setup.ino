@@ -29,13 +29,14 @@ void setup_vars(){
   currentWriteAddressTempMem = 0;
   currentCompressionLevel = 0;
   maxCompressionLevel = 1;
-  temp_mem = (data**) malloc(TEMP_MEMORY_SIZE * sizeof(data*));
+  //temp_mem = (data**) malloc(TEMP_MEMORY_SIZE * sizeof(data*));
   plant = (plant_info*) malloc(sizeof(plant_info));
+  packetQueue = queue_create();
 
   // check if a plant is saved in eeprom
-  if (EEPROM[0] == DEFAULT_PLANT_ID)
+  if (EEPROM[0] == SIGNOFF)
   {
-    Serial.println("no plant in eeprom -> loading default values...");
+    Serial.println("no active plant in eeprom -> loading default values...");
     load_default_plant();
     active = false;
   }
@@ -43,10 +44,8 @@ void setup_vars(){
   {
     // load plant from eeprom
     Serial.print("plant found in eeprom -> loading plant...");
-    read_data(0, (char*) plant, sizeof(plant));
-    Serial.print("loaded plant with temp_opt=");
-    Serial.print(plant->temp_opt);
-    Serial.print("\n");
+    read_eeprom(0, (char*) plant, sizeof(plant_info));
+    print_plant_info(plant);
     active = true;
   }
 
@@ -54,31 +53,12 @@ void setup_vars(){
 
 // set up lcd screen
 void setup_lcd(){
-  LCD.CleanAll(WHITE);    //Clean the screen with black or white.
-    
-  //6*8 font size, auto new line, black character on white back ground.
-  LCD.FontModeConf(Font_6x8, FM_ANL_AAA, BLACK_BAC); 
-
-  //Set the start coordinate.
-  LCD.CharGotoXY(0,0);
-  LCD.println("temp_opt: ");
-  LCD.println("Temp: ");
-  LCD.println("Hum: ");
-  LCD.println("Rad: ");
-  LCD.println("Loud: ");
-  LCD.println("Env: ");
-  LCD.println("loop: ");
-  LCD.println("memory t:    p:");
-  // print units
-  LCD.CharGotoXY(100,8);
-  LCD.print("C");
-  LCD.CharGotoXY(100,16);
-  LCD.print("%");
-  LCD.CharGotoXY(100,24);
-  LCD.print("lm");
-  LCD.CharGotoXY(100,32);
-  LCD.print("db");
-  LCD.CharGotoXY(100,40);
-  LCD.print("%");
-
+  if (active){
+    lcd_setup_sensors();
+    lcd_setup_loop();
+    lcd_setup_clock();
+  }
+  else{
+    lcd_setup_id(); //prepare screen for displaying arduino id
+  }
 }

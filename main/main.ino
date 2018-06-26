@@ -3,13 +3,15 @@
 
 //define sensor pins
   #define HUMIDITY_TEMPERATURE 2
+  #define BUTTON 5
   #define CLOCK D1
   #define LOUDNESS A3
 
-//--xbee--
+//----XBEE----
   // Xbee API Lib
   #include <XBee.h>
   #define PI_ADR 0x0
+  #define ARD_ADR 0x0001
 
   // Software serial com with xbee
   #include <SoftwareSerial.h>
@@ -22,7 +24,6 @@
 
   // Setup response memory
   Rx16Response rx16 = Rx16Response();
-
 
 //----humidity and temerature sensor----
   #include "DHT.h"
@@ -46,21 +47,38 @@
 
 //----define----
   #define MEMORY_SIZE 1024    //measured in bytes
-  #define TEMP_MEMORY_SIZE 1 //measured in packets
+  #define TEMP_MEMORY_SIZE 2 //measured in packets
+  #define QUEUE_SIZE 16
   #define DEFAULT_PLANT_ID 0
   // flags
-  #define NEW_PLANT_REQUEST 0b00000001
-  #define UNLOAD 0b00000010
+  #define SIGNIN  0b00000001
+  #define SIGNOFF 0b00000010
+  #define DATA    0b00000011
   
+  #define MAX_TRIES 3
+  #define END_CHAR 0b00000111
+
 //----structs----
 typedef struct data_{
-  uint32_t time;      //minutes since 1900-01-01
+  uint32_t timestamp;      //minutes since 1900-01-01
   uint8_t comp;       //amount of packets merged into one
-  int16_t temp;        //temperature in deegrees celsius *10
-  uint8_t hum;        //humidity in percent
-  uint16_t rad;       //visible light in lumen
-  uint8_t loud;       //loudness in decibel
+  float temp;        //temperature in deegrees celsius *10
+  float hum;        //humidity in percent
+  float rad;       //visible light in lumen
+  float loud;       //loudness in decibel
 }data;
+
+typedef struct queue_elem_ queue_elem;
+struct queue_elem_ {
+  data* body;
+  queue_elem* next;
+};
+
+typedef struct queue_{
+  queue_elem* first;
+  queue_elem* last;
+  uint8_t count;
+}queue;
 
 typedef struct msg_ {
   uint8_t flags;
@@ -91,10 +109,20 @@ typedef struct plant_info_{
   int currentWriteAddressTempMem;
   int currentCompressionLevel;
   int maxCompressionLevel;
-  data** temp_mem;  //"temporary memory" for saving data packets
+
+  uint16_t eepromPacketSpace = sizeof(plant_info) + 1;
+  uint16_t eepromMaxPackets = (EEPROM.length() - eepromPacketSpace)/sizeof(data); 
+  uint16_t eepromOldestPacket = eepromPacketSpace;
+  uint16_t eepromNumPackets = 0;
+
+  //stores the number of sending attempts
+  uint8_t tries = 0;
+
   plant_info* plant;  //store info about current plant
   int loopno = 0;   //number of loops executed
   boolean active;
+
+  queue* packetQueue;
   
 void setup(){
     Serial.begin(9600);
@@ -107,14 +135,19 @@ void setup(){
     //start i2c communication (LCD and Sunlight Sensor)
     Wire.begin();
 
-    clock.begin();
+    // setup button
+    pinMode(BUTTON, INPUT);
+    
     //set up sensors
+    Serial.println("test");
     setup_sensors();
+    
+    clock.begin();
 
     //initialize global variables and load plant
     setup_vars();
 
-    // set up lcd screen
+    // set up lcd screen, this needs to be called after setup_vars()!
     setup_lcd();
 
     Serial.println("Setup finished.");
@@ -122,46 +155,46 @@ void setup(){
 }
 
 void loop(){
-    // allocate memory for new data packet
-  data* new_data = (data*) calloc(sizeof(data), 1);
-
-  fill_in_sensor_data(new_data);
-
-  // save data in temp memory if plant is active
   if (active){
-    temp_mem[currentWriteAddressTempMem] = new_data;
-    currentWriteAddressTempMem++;
-  }
+    // allocate memory for new data packet
+    data* new_data = (data*) calloc(sizeof(data), 1);
 
-  // send data
-  Serial.println("sending data...");
-  if (sending())
-  {
-    Serial.println("Send Success.");
-    // erase memory
-    Serial.println("Clear Temp Mem.");
-    clear_temp_mem();
-    Serial.println("Clear Perm Mem.");
-    clear_perm_mem();
-  }
-  else
-  {
-    Serial.println("Send Failure.");
-  }
+    //fill in sensor data and append packet to queue
+    fill_in_sensor_data(new_data);
+    queue_append(packetQueue, new_data);
 
-  // receive data
+    send_queue();
+
+    if (packetQueue->count >= QUEUE_SIZE) {
+      packet_to_eeprom(queue_compress(packetQueue));
+      queue_empty(packetQueue);
+    }
+
+    // print environment parameters
+    lcd_print_sensors();
+    lcd_print_loop();
+    lcd_print_clock();
+
+    //check button press
+    if (digitalRead(BUTTON)){
+      Serial.println("pressed button. deactivating plant");
+      active = false;
+      EEPROM[0] = SIGNOFF;
+      // switch lcd display
+      setup_lcd();
+    }
+  }
+  else{
+    Serial.println("plant not active.");
+    lcd_print_id();
+  } 
+
+  // receive data and update plant
   Serial.println("receiving data...");
   receiving();
 
-  // print environment parameters
-  print_on_lcd();
-
-  // write to eeprom if temp mem is full
-  if (currentWriteAddressTempMem >= TEMP_MEMORY_SIZE)
-  {
-    Serial.println("temp mem full. writing to eeprom...");
-    write_temp_to_perm();
-  }
+  // print time on serial
+  //printTime();
 
   loopno++;
   Serial.println("------end-of-loop------");

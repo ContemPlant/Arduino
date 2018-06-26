@@ -2,6 +2,7 @@ void deactivate_plant(){
 	EEPROM[0] = SIGNOFF;
 	active = false;
 	lcd_setup_and_print_qr(qrcode, strlen_P(qrcode));
+  print_X_on_oled();
   send_signoff();
 }
 

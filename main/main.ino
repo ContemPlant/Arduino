@@ -1,3 +1,6 @@
+//----OLED----
+  #include <SeeedGrayOLED.h>
+
 //----EEPROM----
   #include <EEPROM.h>
 
@@ -24,6 +27,7 @@
 
   // Set up response memory.
   Rx16Response rx16 = Rx16Response();
+  TxStatusResponse txStatus = TxStatusResponse();
 
 //----Humidity and Temerature sensor----
   #include "DHT.h"
@@ -151,9 +155,9 @@ void setup(){
   // Set up LCD screen. This needs to be called after setup_vars()!
   setup_lcd();
 
-  //set up oled display
+  // Set up OLED display.
   setup_oled();
-    
+
   Serial.println("Setup finished.");
 }
 
@@ -194,5 +198,5 @@ void loop(){
 
   loopno++;
   Serial.println("------end-of-loop------");
-  delay(10000);
+  delay(1000);
 }

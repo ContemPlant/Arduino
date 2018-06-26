@@ -49,10 +49,12 @@ void setup_lcd(){
 }
 
 void setup_oled() {
-  
   SeeedGrayOled.init(2);          // initialize SEEED OLED display
-    
   SeeedGrayOled.clearDisplay();                  //  clear the screen and set start position to top left corner
-  //Draw binary Bitmap
-  print_X_on_oled();   //  Draw binary Bitmap (96 pixels *96 pixels  / 8) bytes
+  if (active){
+    print_checkmark_on_oled();
+  }
+  else{
+    print_X_on_oled();
+  }
 }

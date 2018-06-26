@@ -16,14 +16,34 @@ boolean sendStructTo(uint16_t addr16, msg* payload) {
   Tx16Request zbTx = Tx16Request(addr16, (uint8_t*) payload, sizeof(msg));
   // Send your request
   xbee.send(zbTx);
+  recv_ack();
   return true;
 }
 
-
-// 1 = success, 0 = failure
-int sending(){
-  return 1;
+boolean recv_ack(){
+      // after sending a tx request, we expect a status response
+    // wait up to 5 seconds for the status response
+    if (xbee.readPacket(5000)) {
+        // got a response!
+      Serial.println("got a response!");
+        // should be a znet tx status             
+      if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
+         xbee.getResponse().getZBTxStatusResponse(txStatus);
+        
+         // get the delivery status, the fifth byte
+           if (txStatus.getStatus() == SUCCESS) {
+              // success.  time to celebrate
+           } else {
+              // the remote XBee did not receive our packet. is it powered on?
+           }
+        }      
+    } else {
+      // local XBee did not provide a timely TX Status Response -- should not happen
+      Serial.println("no response");
+    }
+    return true;
 }
+
 
 //TODO
 char* recv_data(){

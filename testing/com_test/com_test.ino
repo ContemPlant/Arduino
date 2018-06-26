@@ -86,7 +86,9 @@ void loop() {
   
     // after sending a tx request, we expect a status response
     // wait up to 5 seconds for the status response
+    Serial.println("got response?");
     if (xbee.readPacket(5000)) {
+      Serial.println("yes");
         // got a response!
 
         // should be a znet tx status            	
@@ -103,10 +105,12 @@ void loop() {
            }
         }      
     } else if (xbee.getResponse().isError()) {
+      Serial.println("no1");
       //nss.print("Error reading packet.  Error code: ");  
       //nss.println(xbee.getResponse().getErrorCode());
       // or flash error led
     } else {
+      Serial.println("no2");
       // local XBee did not provide a timely TX Status Response.  Radio is not configured properly or connected
       flashLed(errorLed, 2, 50);
     }

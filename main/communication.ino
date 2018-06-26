@@ -132,3 +132,16 @@ int send_eeprom() {
   free(buffer);
   return 1;
 }
+
+// send signoff message to PI
+int send_signoff(){
+  msg* message = (msg*) calloc(sizeof(msg), 1);
+  message->flags = SIGNOFF;
+  // try to send signoff
+  for (int i = 0; i < 100; ++i){
+    if (sendStructTo(PI_ADR, message)){
+      return 1;
+    }
+  }
+  return 0;
+}

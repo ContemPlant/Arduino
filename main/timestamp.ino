@@ -20,6 +20,12 @@ int32_t seconds_from_date(uint8_t second, uint8_t minute, uint8_t hour, uint8_t 
     return seconds;
 }
 
+void printTime() {
+    Serial.print(clock.hour);
+    Serial.print(":");
+    Serial.println(clock.minute);
+}
+
 int32_t timestamp() {
     clock.getTime();
     return seconds_from_date(clock.second, clock.minute, clock.hour, clock.dayOfMonth, clock.month, clock.year);

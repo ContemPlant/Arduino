@@ -1,7 +1,7 @@
 float env_factor (float temp, float hum, float light) {
-  float diff_temp = abs(temp - dht.readTemperature());
-  float diff_hum = abs(hum - dht.readHumidity());
-  float diff_light = abs(light - radsens.ReadVisible());
+  float diff_temp = abs(temp - dht.readTemperature());  //use sensor functions
+  float diff_hum = abs(hum - dht.readHumidity());       //
+  float diff_light = abs(light - radsens.ReadVisible());//
 
   return (plant->temp_weight * fnct(10.0, diff_temp) + plant->hum_weight * fnct(20.0, diff_hum) + 
           plant->rad_weight * fnct(100.0, diff_light));

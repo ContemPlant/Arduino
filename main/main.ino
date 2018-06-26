@@ -151,6 +151,9 @@ void setup(){
   // Set up LCD screen. This needs to be called after setup_vars()!
   setup_lcd();
 
+  //set up oled display
+  setup_oled();
+    
   Serial.println("Setup finished.");
 }
 

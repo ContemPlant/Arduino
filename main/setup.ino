@@ -6,20 +6,9 @@ void setup_sensors(){
   
   //radiation sensor
   while (!radsens.Begin()) {
+    Serial.println("Setting up Radiation Sensor failed! Waiting 500ms and trying again.");
     delay(500);
   }
-}
-
-void load_default_plant(){
-  plant->temp_opt = 23.0;
-  plant->hum_opt = 50.0;
-  plant->rad_opt = 500.0;
-  plant->loud_opt = 0.0;
-
-  plant->temp_weight = 1;
-  plant->hum_weight = 0.5;
-  plant->rad_weight = 0.7;
-  plant->loud_weight = 1;
 }
 
 //initialize global variables
@@ -29,19 +18,15 @@ void setup_vars(){
   currentWriteAddressTempMem = 0;
   currentCompressionLevel = 0;
   maxCompressionLevel = 1;
-  //temp_mem = (data**) malloc(TEMP_MEMORY_SIZE * sizeof(data*));
   plant = (plant_info*) malloc(sizeof(plant_info));
   packetQueue = queue_create();
 
   // check if a plant is saved in eeprom
-  if (EEPROM[0] == SIGNOFF)
-  {
-    Serial.println("no active plant in eeprom -> loading default values...");
-    load_default_plant();
-    active = false;
+  if (EEPROM[0] == SIGNOFF){
+    Serial.println("No active plant in EEPROM. Deactivate plant.");
+    deactivate_plant();
   }
-  else
-  {
+  else{
     // load plant from eeprom
     Serial.print("plant found in eeprom -> loading plant...");
     read_eeprom(0, (char*) plant, sizeof(plant_info));
@@ -59,6 +44,6 @@ void setup_lcd(){
     lcd_setup_clock();
   }
   else{
-    lcd_setup_id(); //prepare screen for displaying arduino id
+    deactivate_plant();
   }
 }

@@ -22,20 +22,6 @@ boolean sendStructTo(uint16_t addr16, msg* payload) {
 
 // 1 = success, 0 = failure
 int sending(){
-//  int num_packets = currentWriteAddressTempMem + ((currentWriteAddress - startWriteAddress) / sizeof(plant_info));
-//  data** buffer = (data**) select_data_to_send();
-//  for (int i = 0; i < num_packets; ++i)
-//  {
-//    Serial.print("sending packet number ");
-//    Serial.println(i);
-//    msg* payload = packMsg(buffer[i]);
-//    Serial.println("Sending packagae:\n\n");
-//    print_packet(buffer[i]);
-//    print_msg(payload);
-//    sendStructTo(PI_ADR, payload);
-//    free(payload);
-//    delay(500);
-//  }
   return 1;
 }
 
@@ -82,12 +68,8 @@ void receiving(){
     }
   }
   else if (buffer[0] & SIGNOFF){
-    Serial.println("Deactivated plant. Loading default plant. Stop saving data.");
-    active = false;
-    EEPROM[0] = SIGNOFF;
-    // switch lcd display
-    setup_lcd();
-    load_default_plant(); //not needed anymore?
+    Serial.println("Deactivated plant. Stop saving data.");
+    deactivate_plant();
   }
   else{
     Serial.println("Received packet with unknown flag or received nothing this time");

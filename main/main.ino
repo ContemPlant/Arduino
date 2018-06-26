@@ -1,7 +1,7 @@
 //----EEPROM----
   #include <EEPROM.h>
 
-//define sensor pins
+// Define sensor pins.
   #define HUMIDITY_TEMPERATURE 2
   #define BUTTON 5
   #define CLOCK D1
@@ -19,29 +19,29 @@
   #define txPin 4
   SoftwareSerial softwareSerial(rxPin, txPin);
 
-  // Create an XBee object at the top of your sketch
+  // Create an XBee object at the top of your sketch.
   XBee xbee = XBee();
 
-  // Setup response memory
+  // Set up response memory.
   Rx16Response rx16 = Rx16Response();
 
-//----humidity and temerature sensor----
+//----Humidity and Temerature sensor----
   #include "DHT.h"
   #define DHTTYPE DHT22
   DHT dht(HUMIDITY_TEMPERATURE, DHTTYPE);
 
-//----radiation sensor----
+//----Radiation sensor----
   #include <Wire.h>
   #include "Arduino.h"
   #include "SI114X.h"
   SI114X radsens = SI114X();
 
-//----lcd display----
+//----LCD display----
   #include <I2C_LCD.h>
   I2C_LCD LCD;
   uint8_t I2C_LCD_ADDRESS = 0x51; //Device address configuration, the default value is 0x51.
 
-//----rt clock-----
+//----RT Clock-----
   #include "DS1307.h"
   DS1307 clock;//define a object of DS1307 class
 
@@ -60,12 +60,12 @@
 
 //----structs----
 typedef struct data_{
-  uint32_t timestamp;      //minutes since 1900-01-01
-  uint8_t comp;       //amount of packets merged into one
-  float temp;        //temperature in deegrees celsius *10
-  float hum;        //humidity in percent
-  float rad;       //visible light in lumen
-  float loud;       //loudness in decibel
+  uint32_t timestamp;     //minutes since 1900-01-01
+  uint8_t comp;           //amount of packets merged into one
+  float temp;             //temperature in deegrees celsius
+  float hum;              //humidity in percent
+  float rad;              //visible light in lumen
+  float loud;             //loudness in decibel
 }data;
 
 typedef struct queue_elem_ queue_elem;
@@ -80,9 +80,9 @@ typedef struct queue_{
   uint8_t count;
 }queue;
 
-typedef struct msg_ {
-  uint8_t flags;
-  uint16_t sourceID;
+typedef struct msg_ {     //data packet Ardu -> PI
+  uint8_t flags;          //DATA
+  uint16_t sourceID;      //ARD_ADR
   int32_t timestamp;
   uint8_t compression;
   float temp;
@@ -92,7 +92,7 @@ typedef struct msg_ {
 }msg;
 
 typedef struct plant_info_{
-  uint8_t flags;
+  uint8_t flags;          //e.g. SIGNIN
   float temp_opt;
   float temp_weight;
   float hum_opt;
@@ -115,43 +115,43 @@ typedef struct plant_info_{
   uint16_t eepromOldestPacket = eepromPacketSpace;
   uint16_t eepromNumPackets = 0;
 
-  //stores the number of sending attempts
-  uint8_t tries = 0;
+  uint8_t tries = 0;  //stores the number of sending attempts
 
   plant_info* plant;  //store info about current plant
-  int loopno = 0;   //number of loops executed
-  boolean active;
+  int loopno = 0;     //number of loops executed
+  boolean active;     //true if plant is loaded on to Ardu
 
+  const char qrcode[] PROGMEM = "1111111001000011001111111100000101001001100100000110111010010100001010111011011101000000111001011101101110100111011100101110110000010100111101010000011111111010101010101111111000000001111111110000000000001111001011000011000101111010100101101101000001110010111011011011001111001110001100010011001111100001011000101001101010001100111010101010001111000100011010010001110011001100001110101110101111001110111000111010011011111000100000000100001001000111011111111010100011101011010100000101011010010001001010111010100000111111100111011101000110000110110001101110100000000001011011010000010001000101100111101111111001011010011001011";
+  
   queue* packetQueue;
   
 void setup(){
-    Serial.begin(9600);
-    softwareSerial.begin(9600);
-    Serial.println("Setting up...");
+  Serial.begin(9600);
+  Serial.println("Setting up...");
 
-    // Tell XBee to use Hardware Serial. It's also possible to use SoftwareSerial
-    xbee.setSerial(softwareSerial);
+  // Tell XBee to use Software Serial.
+  softwareSerial.begin(9600);
+  xbee.setSerial(softwareSerial);
 
-    //start i2c communication (LCD and Sunlight Sensor)
-    Wire.begin();
+  // Start I2C communication (LCD and Sunlight Sensor).
+  Wire.begin();
 
-    // setup button
-    pinMode(BUTTON, INPUT);
-    
-    //set up sensors
-    Serial.println("test");
-    setup_sensors();
-    
-    clock.begin();
+  // Set up button.
+  pinMode(BUTTON, INPUT);
+  
+  // Set up sensors.
+  setup_sensors();
 
-    //initialize global variables and load plant
-    setup_vars();
+  // Set up clock.
+  clock.begin();
 
-    // set up lcd screen, this needs to be called after setup_vars()!
-    setup_lcd();
+  // Initialize global variables and load plant.
+  setup_vars();
 
-    Serial.println("Setup finished.");
+  // Set up LCD screen. This needs to be called after setup_vars()!
+  setup_lcd();
 
+  Serial.println("Setup finished.");
 }
 
 void loop(){
@@ -176,17 +176,10 @@ void loop(){
     lcd_print_clock();
 
     //check button press
-    if (digitalRead(BUTTON)){
-      Serial.println("pressed button. deactivating plant");
-      active = false;
-      EEPROM[0] = SIGNOFF;
-      // switch lcd display
-      setup_lcd();
-    }
+    read_button();
   }
   else{
-    Serial.println("plant not active.");
-    lcd_print_id();
+    Serial.println("plant not active. Doing nothing.");
   } 
 
   // receive data and update plant
@@ -194,9 +187,9 @@ void loop(){
   receiving();
 
   // print time on serial
-  //printTime();
+  printTime();
 
   loopno++;
   Serial.println("------end-of-loop------");
-  delay(1000);
+  delay(10000);
 }

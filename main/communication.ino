@@ -85,6 +85,8 @@ void receiving(){
       active = true;
       // switch lcd display
       setup_lcd();
+      //switch oled display
+      print_checkmark_on_oled();
     }
     else{
       Serial.println("not all data points of old plant have been sent. doing nothing.");

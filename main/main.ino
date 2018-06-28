@@ -181,9 +181,9 @@ void loop(){
     }
 
     // print environment parameters
-    lcd_print_sensors();
-    lcd_print_loop();
-    lcd_print_clock();
+    //lcd_print_sensors();
+    //lcd_print_loop();
+    //lcd_print_clock();
 
     //check button press
     read_button();

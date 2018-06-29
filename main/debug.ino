@@ -1,8 +1,8 @@
-uint32_t get_time(){
+uint32_t get_time() {
   return loopno;
 }
 
-void print_packet(data* p){
+void print_packet(data* p) {
   Serial.print("#########\n");
   Serial.print("time: ");
   Serial.print(p->timestamp);
@@ -19,7 +19,7 @@ void print_packet(data* p){
   Serial.print("\n#########\n");
 }
 
-void print_plant_info(plant_info* p){
+void print_plant_info(plant_info* p) {
   Serial.print("#########\n");
   Serial.print("flags: ");
   Serial.print(p->flags);
@@ -39,7 +39,7 @@ void print_plant_info(plant_info* p){
   Serial.print(p->loud_opt);
   Serial.print("\nloud weight: ");
   Serial.print(p->loud_weight);
-  Serial.print("\n#########\n"); 
+  Serial.print("\n#########\n");
 }
 
 void print_msg(msg* payload) {
@@ -61,6 +61,6 @@ void print_msg(msg* payload) {
   Serial.print(payload->rad);
   Serial.print("\nLoud: ");
   Serial.print(payload->flags);
-  Serial.print("\n#########\n"); 
+  Serial.print("\n#########\n");
 }
 

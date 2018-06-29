@@ -1,4 +1,4 @@
-msg* packMsg(data* payload){
+msg* packMsg(data* payload) {
   msg* msg_buffer = (msg*) calloc(sizeof(msg), 1);
   msg_buffer->flags = DATA;
   msg_buffer->sourceID = ARD_ADR;
@@ -20,46 +20,46 @@ boolean sendStructTo(uint16_t addr16, msg* payload) {
   return true;
 }
 
-boolean recv_ack(){
-      // after sending a tx request, we expect a status response
-    // wait up to 5 seconds for the status response
-    if (xbee.readPacket(5000)) {
-        // got a response!
-      Serial.println("got a response!");
-        // should be a znet tx status             
-      if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
-        Serial.println("got a TX_STATUS_RESPONSE response!");
-         xbee.getResponse().getZBTxStatusResponse(txStatus);
-        
-         // get the delivery status, the fifth byte
-           if (txStatus.getStatus() == SUCCESS) {
-              // success.  time to celebrate
-              Serial.println("ack received!");
-           } else {
-              // the remote XBee did not receive our packet. is it powered on?
-              Serial.println("no ack!");
-           }
-        }      
-    } else {
-      // local XBee did not provide a timely TX Status Response -- should not happen
-      Serial.println("no response");
+boolean recv_ack() {
+  // after sending a tx request, we expect a status response
+  // wait up to 5 seconds for the status response
+  if (xbee.readPacket(5000)) {
+    // got a response!
+    Serial.println("got a response!");
+    // should be a znet tx status
+    if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
+      Serial.println("got a TX_STATUS_RESPONSE response!");
+      xbee.getResponse().getZBTxStatusResponse(txStatus);
+
+      // get the delivery status, the fifth byte
+      if (txStatus.getStatus() == SUCCESS) {
+        // success.  time to celebrate
+        Serial.println("ack received!");
+      } else {
+        // the remote XBee did not receive our packet. is it powered on?
+        Serial.println("no ack!");
+      }
     }
-    return true;
+  } else {
+    // local XBee did not provide a timely TX Status Response -- should not happen
+    Serial.println("no response");
+  }
+  return true;
 }
 
 
 //TODO
-char* recv_data(){
-  char* buffer = (char*) calloc(sizeof(plant_info), 1); 
+char* recv_data() {
+  char* buffer = (char*) calloc(sizeof(plant_info), 1);
 
   xbee.readPacket();
   if (xbee.getResponse().isAvailable()) {
     if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
       xbee.getResponse().getRx16Response(rx16);
-      for (int i = 0; i < rx16.getDataLength(); i++) { 
-        Serial.print(rx16.getData(i)); 
+      for (int i = 0; i < rx16.getDataLength(); i++) {
+        Serial.print(rx16.getData(i));
         buffer[i] = rx16.getData(i);
-      } 
+      }
     }
   }
 
@@ -67,13 +67,13 @@ char* recv_data(){
 }
 
 // update plant values
-void receiving(){
+void receiving() {
   char* buffer = recv_data();
   // new plant request
-  if (buffer[0] & SIGNIN){
+  if (buffer[0] & SIGNIN) {
     Serial.println("received new plant.");
     // only update plant if all data points of the old plant have been sent
-    if (true){
+    if (true) {
       Serial.println("updating values.");
       memcpy(plant, buffer, sizeof(plant_info));
       print_plant_info(plant);
@@ -88,15 +88,15 @@ void receiving(){
       //switch oled display
       print_checkmark_on_oled();
     }
-    else{
+    else {
       Serial.println("not all data points of old plant have been sent. doing nothing.");
     }
   }
-  else if (buffer[0] & SIGNOFF){
+  else if (buffer[0] & SIGNOFF) {
     Serial.println("Deactivated plant. Stop saving data.");
     deactivate_plant();
   }
-  else{
+  else {
     Serial.println("Received packet with unknown flag or received nothing this time");
   }
 
@@ -105,7 +105,7 @@ void receiving(){
 
 void send_queue() {
   tries = 0;
-  
+
   //try to send packets in queue
   while (packetQueue->count && tries < MAX_TRIES) {
     msg* payload = packMsg(queue_peek(packetQueue));
@@ -128,8 +128,8 @@ int send_eeprom() {
   tries = 0;
   uint8_t packet = 0;
   uint16_t index = 0;
-  
-  while(eepromNumPackets - packet && tries < MAX_TRIES) {
+
+  while (eepromNumPackets - packet && tries < MAX_TRIES) {
 
     index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (packet * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
     EEPROM.get(index, buffer);
@@ -141,7 +141,7 @@ int send_eeprom() {
       packet++;
     }
     else {
-      tries++;      
+      tries++;
     }
   }
 
@@ -159,12 +159,13 @@ int send_eeprom() {
 }
 
 // send signoff message to PI
-int send_signoff(){
+int send_signoff() {
   msg* message = (msg*) calloc(sizeof(msg), 1);
   message->flags = SIGNOFF;
+  message->sourceID = ARD_ADR;
   // try to send signoff
-  for (int i = 0; i < 100; ++i){
-    if (sendStructTo(PI_ADR, message)){
+  for (int i = 0; i < 100; ++i) {
+    if (sendStructTo(PI_ADR, message)) {
       return 1;
     }
   }

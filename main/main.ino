@@ -4,9 +4,6 @@
 //----EEPROM----
 #include <EEPROM.h>
 
-//---QRLIB----
-  #include "qrlib/qrcodegen.h"
-
 // Define sensor pins.
 #define HUMIDITY_TEMPERATURE 2
 #define BUTTON 5
@@ -184,9 +181,9 @@ void loop() {
     }
 
     // print environment parameters
-    //lcd_print_sensors();
-    //lcd_print_loop();
-    //lcd_print_clock();
+    lcd_print_sensors();
+    lcd_print_loop();
+    lcd_print_clock();
 
     //check button press
     read_button();

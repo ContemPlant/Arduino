@@ -81,19 +81,18 @@ void lcd_setup_clock() {
   LCD.println("time:");
 }
 
-void lcd_setup_and_print_qr(const char* qr, int len) {
-  for (int i = 0; i < len; i++) {
+void lcd_setup_and_print_qr(const char* qr, int len){
+  for (int i = 0; i < len; i++){
     Serial.print(pgm_read_byte_near(qr + i));
   }
   LCD.CleanAll(WHITE);    //Clean the screen with black or white.
   int vert_size = sqrt(len);
-  for (int i = 0; i < len; i++)
+  int rectangle_size = 3;
+  for(int i = 0; i < len; i++)
   {
-
     if (pgm_read_byte_near(qr + i) == '1') {
       // draw 2x2 rectangle
-      LCD.DrawRectangleAt(2 * (i % vert_size), 2 * (i / vert_size), 2, 2, BLACK_FILL);
+      LCD.DrawRectangleAt(rectangle_size * (i % vert_size), rectangle_size * (i / vert_size), rectangle_size, rectangle_size, BLACK_FILL);
     }
   }
-
 }

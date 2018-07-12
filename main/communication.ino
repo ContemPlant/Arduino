@@ -17,7 +17,7 @@ boolean sendStructTo(uint16_t addr16, msg* payload) {
   // Send your request
   xbee.send(zbTx);
   recv_ack();
-  return false;
+  return true;
 }
 
 boolean recv_ack() {
@@ -132,7 +132,9 @@ int send_eeprom() {
   while (eepromNumPackets - packet && tries < MAX_TRIES) {
 
     index = eepromPacketSpace + (eepromOldestPacket - eepromPacketSpace + (packet * sizeof(data)) % (EEPROM.length() - eepromPacketSpace));
-    EEPROM.get(index, buffer);
+    Serial.print("getting eeprom packet at index ");
+    Serial.println(index);
+    EEPROM.get(index, *buffer);
     msg* payload = packMsg(buffer);
 
     if (sendStructTo(PI_ADR, payload)) {

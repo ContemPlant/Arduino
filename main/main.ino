@@ -4,6 +4,9 @@
 //----EEPROM----
 #include <EEPROM.h>
 
+//---QRLIB----
+  #include "qrlib/qrcodegen.h"
+
 // Define sensor pins.
 #define HUMIDITY_TEMPERATURE 2
 #define BUTTON 5

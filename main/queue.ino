@@ -66,4 +66,5 @@ void queue_empty(queue* q) {
     free(cur);
     cur = next;
   }
+  q->count = 0;
 }

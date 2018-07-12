@@ -17,7 +17,7 @@ boolean sendStructTo(uint16_t addr16, msg* payload) {
   // Send your request
   xbee.send(zbTx);
   recv_ack();
-  return true;
+  return false;
 }
 
 boolean recv_ack() {

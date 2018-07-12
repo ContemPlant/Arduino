@@ -52,6 +52,16 @@ void lcd_setup_loop() {
   LCD.println("loop: ");
 }
 
+void lcd_print_eeprom() {
+  LCD.CharGotoXY(40, 48);
+  LCD.print(eepromNumPackets);
+}
+
+void lcd_setup_eeprom() {
+  LCD.CharGotoXY(0, 48);
+  LCD.println("eeprom: ");
+}
+
 void lcd_print_id() {
   LCD.CharGotoXY(16, 32);
   char str[4];

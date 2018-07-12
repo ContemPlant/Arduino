@@ -52,7 +52,7 @@ DS1307 clock;//define a object of DS1307 class
 //----define----
 #define MEMORY_SIZE 1024    //measured in bytes
 #define TEMP_MEMORY_SIZE 2 //measured in packets
-#define QUEUE_SIZE 16
+#define QUEUE_SIZE 1
 #define DEFAULT_PLANT_ID 0
 // flags
 #define SIGNIN  0b00000001
@@ -184,6 +184,7 @@ void loop() {
     lcd_print_sensors();
     lcd_print_loop();
     lcd_print_clock();
+    lcd_print_eeprom();
 
     //check button press
     read_button();
@@ -201,5 +202,5 @@ void loop() {
 
   loopno++;
   Serial.println("------end-of-loop------");
-  delay(1000);
+  delay(500);
 }

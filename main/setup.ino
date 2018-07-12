@@ -42,6 +42,7 @@ void setup_lcd() {
     lcd_setup_sensors();
     lcd_setup_loop();
     lcd_setup_clock();
+    lcd_setup_eeprom();
   }
   else {
     deactivate_plant();

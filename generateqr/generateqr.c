@@ -66,12 +66,12 @@ int main(int argc, char const *argv[]){
 	int size;
 
 	// code from binary
-	uint8_t dataAndTemp[qrcodegen_BUFFER_LEN_FOR_VERSION(7)] = {0x00, 0x00, 0x00, 0x01};
-	int len = 4;
-	bool* qrcode = qrFromBin(dataAndTemp, &size, len);
+	// uint8_t dataAndTemp[qrcodegen_BUFFER_LEN_FOR_VERSION(7)] = {0x00, 0x00, 0x00, 0x01};
+	// int len = 4;
+	// bool* qrcode = qrFromBin(dataAndTemp, &size, len);
 
 	// code from string
-	// bool* qrcode = qrFromString("MIT CONTEMPLANT GEHTS DIR GUT MIT CONTEMPLANT GEHTS DIR GUT", &size);
+	bool* qrcode = qrFromString("0002", &size);
 
 	if (!qrcode) return -1;
 	FILE* f = fopen("qrcode.txt", "w+");

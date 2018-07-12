@@ -81,37 +81,18 @@ void lcd_setup_clock(){
   LCD.println("time:");
 }
 
-void lcd_setup_and_print_qr(int len){
-  
+void lcd_setup_and_print_qr(const char* qr, int len){
   for (int i = 0; i < len; i++){
-    Serial.println(pgm_read_byte_near(qrcode + i));
+    Serial.print(pgm_read_byte_near(qr + i));
   }
   LCD.CleanAll(WHITE);    //Clean the screen with black or white.
-  int vert_size = sqrt(len*8) + 2;
-    Serial.println(len);
+  int vert_size = sqrt(len);
   for(int i = 0; i < len; i++)
   {
-    int j = i*8;
-    unsigned char qr_byte = pgm_read_byte_near(qrcode + i);
-    while ( j < ((i * 8) + 8)){  //qr_byte) {
-//      Serial.println(qr_byte & 1);
-      Serial.print("j = ");
-      Serial.println(j);
-      if (qr_byte & 0b10000000) {
-      // Current bit is set to 1
-        Serial.println("PRINT");
-        LCD.DrawRectangleAt(2 * (j % vert_size), 2 * (j / vert_size), 2, 2, BLACK_FILL);
-      } else {
-        Serial.println("DONT PRINT");
-      // Current bit is set to 0
-      }
-      qr_byte <<= 1;
-      j++;
-    } 
-//    if (pgm_read_byte_near(qrcode + i) == '1') {
-//      // draw 2x2 rectangle
-//      LCD.DrawRectangleAt(2 * (i % vert_size), 2 * (i / vert_size), 2, 2, BLACK_FILL);
-//    }
+    
+    if (pgm_read_byte_near(qr + i) == '1') {
+      // draw 2x2 rectangle
+      LCD.DrawRectangleAt(2 * (i % vert_size), 2 * (i / vert_size), 2, 2, BLACK_FILL);
+    }
   }
-  
 }
